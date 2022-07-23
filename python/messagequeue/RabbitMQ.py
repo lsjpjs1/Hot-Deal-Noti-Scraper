@@ -23,7 +23,7 @@ class RabbitMQ:
         connection.close()
 
 
-frame = pd.DataFrame({"aa": [], "bb": [], "cc": [], "url": []})
-frame = frame.append({"aa": 13, "bb": 10000, "cc": "하이", "url": "www.naver.com"},ignore_index=True)
-mq = RabbitMQ()
-mq.publish(frame.to_json())
+# frame = pd.DataFrame({"aa": [], "bb": [], "cc": [], "url": []})
+# frame = frame.append({"aa": 13, "bb": 10000, "cc": "하이", "url": "www.naver.com"},ignore_index=True)
+# mq = RabbitMQ()
+# mq.publish(frame.to_json())
