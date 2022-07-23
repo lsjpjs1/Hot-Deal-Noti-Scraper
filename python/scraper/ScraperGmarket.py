@@ -1,4 +1,3 @@
-from python.scraper.Scraper import Scraper
 import re
 import time
 from datetime import datetime

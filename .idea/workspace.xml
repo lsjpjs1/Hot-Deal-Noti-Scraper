@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="180bd9f3-6230-4477-b510-7160a1218d43" name="Changes" comment="" />
+    <list default="true" id="180bd9f3-6230-4477-b510-7160a1218d43" name="Changes" comment="first commit">
+      <change afterPath="$PROJECT_DIR$/python/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/python/scraper/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/python/scraper/ScraperGmarket.py" beforeDir="false" afterPath="$PROJECT_DIR$/python/scraper/ScraperGmarket.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -32,12 +38,15 @@
     <option name="stateVersion" value="1" />
   </component>
   <component name="ProjectId" id="2CH3pcRA8U2DDLhhhH7zvxNQAhC" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="ASKED_MARK_IGNORED_FILES_AS_EXCLUDED" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
@@ -51,6 +60,11 @@
         <option name="myModuleName" value="HotDealNotification" />
       </console-settings>
     </option>
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/python/S" />
+    </key>
   </component>
   <component name="RunManager" selected="Python.ScraperGmarket">
     <configuration name="Download" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
@@ -88,7 +102,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/python/scraper/Scraper11st.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/python/S/Scraper11st.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -110,7 +124,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/python/scraper/ScraperGmarket.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/python/S/ScraperGmarket.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -140,8 +154,18 @@
       <workItem from="1658447106321" duration="1205000" />
       <workItem from="1658448731134" duration="747000" />
       <workItem from="1658449490953" duration="1070000" />
-      <workItem from="1658498181797" duration="5763000" />
+      <workItem from="1658498181797" duration="6075000" />
+      <workItem from="1658558983667" duration="13000" />
+      <workItem from="1658564528993" duration="418000" />
     </task>
+    <task id="LOCAL-00001" summary="first commit">
+      <created>1658557593249</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1658557593249</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -162,6 +186,8 @@
     <ignored-roots>
       <path value="$PROJECT_DIR$" />
     </ignored-roots>
+    <MESSAGE value="first commit" />
+    <option name="LAST_COMMIT_MESSAGE" value="first commit" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/HotDealNotification$ScraperGmarket.coverage" NAME="ScraperGmarket Coverage Results" MODIFIED="1658501142187" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/python/scraper" />
