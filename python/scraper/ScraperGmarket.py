@@ -1,7 +1,7 @@
+import json
 import re
 import time
-from datetime import datetime
-import pandas as pd
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
@@ -12,7 +12,6 @@ from python.scraper.Scraper import Scraper
 class ScraperGmarket(Scraper):
 
     def initSite(self, driver, searchWord):
-        self.result = pd.DataFrame({"할인율": [], "할인가": [], "제목": [], "url": []})
         driver.get("https://www.gmarket.co.kr/")
         self.wait(driver, (By.XPATH, "//input[@title='검색창']"))
         driver.find_element_by_xpath("//input[@title='검색창']").send_keys(searchWord)
@@ -29,6 +28,7 @@ class ScraperGmarket(Scraper):
 
         comma_won_re = re.compile('([0-9]{1,3}(,[0-9]{3})+)')
         man_won_re = re.compile('([0-9]+)만')
+        resList=list()
         for item in items:
             original_title = item.find_element_by_xpath(".//span[@class='text__item']").text
             title = original_title.replace(" ", "")
@@ -50,11 +50,9 @@ class ScraperGmarket(Scraper):
                     discount_list.append([int(100 - 100 * price_candidate / original_price), price_candidate, url])
             if discount_list:
                 if 0 <= discount_list[0][0] <= 100:
-                    self.result = self.result.append(
-                        {"할인율": str(discount_list[0][0]) + "%", "할인가": discount_list[0][1], "제목": original_title,
-                         "url": discount_list[0][2]}, ignore_index=True)
-                    print(title)
-                    print(discount_list)
+                    resList.append({"할인율": str(discount_list[0][0]) + "%", "할인가": discount_list[0][1], "제목": original_title,
+                         "url": discount_list[0][2]})
+        self.mq.publish(json.dumps(resList))
 
     def goNextPage(self, driver):
         self.wait(driver, (By.XPATH, "//a[@class='link__page-next']"))
@@ -66,16 +64,13 @@ class ScraperGmarket(Scraper):
         for searchWord in searchWords:
             self.initSite(driver, searchWord)
             try:
-                for i in range(30   ):
+                for i in range(25):
                     self.collectData(driver)
                     self.goNextPage(driver)
                     time.sleep(1)
             except Exception as e:
                 print(e)
                 continue
-            finally:
-                self.result.to_csv(f'../result/노트북_G마켓_{datetime.now().date()}.csv', index=False, header=False,
-                                   mode="a")
 
 
 searchWords = [

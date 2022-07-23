@@ -1,3 +1,4 @@
+import json
 import re
 import time
 from datetime import datetime
@@ -7,6 +8,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
+from python.messagequeue.RabbitMQ import RabbitMQ
 from python.scraper.Scraper import Scraper
 
 
@@ -43,6 +45,7 @@ class Scraper11st(Scraper):
 
         comma_won_re = re.compile('([0-9]{1,3}(,[0-9]{3})+)')
         man_won_re = re.compile('([0-9]+)만')
+        resList = list()
         for item in items:
             original_title = item.find_element_by_xpath(".//div[@class='c_prd_name c_prd_name_row_1']").text
             title = item.find_element_by_xpath(".//div[@class='c_prd_name c_prd_name_row_1']").text.replace(" ", "")
@@ -64,11 +67,10 @@ class Scraper11st(Scraper):
                     discount_list.append([int(100 - 100 * price_candidate / original_price), price_candidate, url])
             if discount_list:
                 if 0 <= discount_list[0][0] <= 100:
-                    self.result = self.result.append(
+                    resList.append(
                         {"할인율": str(discount_list[0][0]) + "%", "할인가": discount_list[0][1], "제목": original_title,
-                         "url": discount_list[0][2]}, ignore_index=True)
-                    print(title)
-                    print(discount_list)
+                         "url": discount_list[0][2]})
+        self.mq.publish(json.dumps(resList))
 
     def getCurrentPage(self, driver):
         self.wait(driver, (By.XPATH, "//li[@class='active']"))
@@ -97,6 +99,8 @@ class Scraper11st(Scraper):
                 print(e)
                 continue
             finally:
+                mq = RabbitMQ()
+                mq.publish(self.result.to_json())
                 self.result.to_csv(f'./result/노트북_11번가_{datetime.now().date()}.csv', index=False, header=False,
                                    mode="a")
 
