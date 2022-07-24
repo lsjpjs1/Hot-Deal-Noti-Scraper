@@ -26,4 +26,10 @@ class RabbitMQ:
 
 
 # mq = RabbitMQ()
-# mq.publish(json.dumps({"aa": "hello", "bb": "hi"}))
+# mq.publish(json.dumps({"hotDealMessages": [
+#     {
+#         "discountRate": 1, "discountPrice": 1,
+#         "originalPrice": 1, "title": "original_title",
+#         "url": "discount_list[0][2]"
+#     }
+# ]}))

@@ -28,7 +28,7 @@ class ScraperGmarket(Scraper):
 
         comma_won_re = re.compile('([0-9]{1,3}(,[0-9]{3})+)')
         man_won_re = re.compile('([0-9]+)만')
-        resList = list()
+        res = {"hotDealMessages":[]}
         for item in items:
             original_title = item.find_element_by_xpath(".//span[@class='text__item']").text
             title = original_title.replace(" ", "")
@@ -50,17 +50,14 @@ class ScraperGmarket(Scraper):
                     discount_list.append([int(100 - 100 * price_candidate / original_price), price_candidate, url])
             if discount_list:
                 if 0 <= discount_list[0][0] <= 100:
-                    resList.append(
-                        {
-                            "hotDealMessages":
+                    res.get("hotDealMessages").append(
                                 {
                                     "discountRate": discount_list[0][0], "discountPrice": discount_list[0][1],
                                     "originalPrice": original_price, "title": original_title,
                                     "url": discount_list[0][2]
                                 }
-                        }
                     )
-        self.mq.publish(json.dumps(resList))
+        self.mq.publish(json.dumps(res))
 
     def goNextPage(self, driver):
         self.wait(driver, (By.XPATH, "//a[@class='link__page-next']"))
