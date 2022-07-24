@@ -13,11 +13,9 @@ from python.scraper.Scraper import Scraper
 
 
 class Scraper11st(Scraper):
-
     isPowerProduct = True
 
     def initSite(self, driver, searchWord):
-        self.result = pd.DataFrame({"할인율": [], "할인가": [], "제목": [], "url": []})
         self.isPowerProduct = True
         driver.get("https://www.11st.co.kr/main")
         self.wait(driver, (By.XPATH, "//input[@title='통합검색']"))
@@ -68,8 +66,15 @@ class Scraper11st(Scraper):
             if discount_list:
                 if 0 <= discount_list[0][0] <= 100:
                     resList.append(
-                        {"할인율": str(discount_list[0][0]) + "%", "할인가": discount_list[0][1], "제목": original_title,
-                         "url": discount_list[0][2]})
+                        {
+                            "hotDealMessages":
+                                {
+                                    "discountRate": discount_list[0][0], "discountPrice": discount_list[0][1],
+                                    "originalPrice": original_price, "title": original_title,
+                                    "url": discount_list[0][2]
+                                }
+                        }
+                    )
         self.mq.publish(json.dumps(resList))
 
     def getCurrentPage(self, driver):
@@ -98,11 +103,6 @@ class Scraper11st(Scraper):
             except Exception as e:
                 print(e)
                 continue
-            finally:
-                mq = RabbitMQ()
-                mq.publish(self.result.to_json())
-                self.result.to_csv(f'./result/노트북_11번가_{datetime.now().date()}.csv', index=False, header=False,
-                                   mode="a")
 
 
 searchWords = [
