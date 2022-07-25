@@ -6,7 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
-from python.scraper.Scraper import Scraper
+from . import Scraper
 
 
 class ScraperGmarket(Scraper):
