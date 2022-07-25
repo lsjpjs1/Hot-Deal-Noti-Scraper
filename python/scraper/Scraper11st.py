@@ -72,7 +72,6 @@ class Scraper11st(Scraper):
                             "url": discount_list[0][2]
                         }
                     )
-
         self.mq.publish(json.dumps(res))
 
     def getCurrentPage(self, driver):
