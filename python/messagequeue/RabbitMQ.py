@@ -1,9 +1,7 @@
-import json
+import os
 
-import pandas as pd
 import pika
 from dotenv import load_dotenv
-import os
 
 
 class RabbitMQ:
