@@ -1,12 +1,15 @@
 import json
 import re
 import time
+from datetime import datetime
 
+import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
-from . import Scraper
+from python.messagequeue.RabbitMQ import RabbitMQ
+from python.scraper.Scraper import Scraper
 
 
 class Scraper11st(Scraper):
