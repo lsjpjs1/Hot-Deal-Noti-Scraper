@@ -2,7 +2,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 import pandas as pd
 
-from ..messagequeue import RabbitMQ
+from RabbitMQ import RabbitMQ
 
 
 class Scraper:
