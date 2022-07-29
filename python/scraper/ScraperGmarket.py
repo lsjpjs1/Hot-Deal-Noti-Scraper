@@ -80,9 +80,3 @@ class ScraperGmarket(Scraper):
                 print(e)
                 continue
 
-
-searchWords = [
-    "노트북"
-]
-scraper = ScraperGmarket()
-scraper.startScraping(searchWords)
