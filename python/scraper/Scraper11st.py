@@ -10,7 +10,7 @@ from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
 from .Scraper import Scraper
-
+from .WebdriverBuilder import WebdriverBuilder
 
 class Scraper11st(Scraper):
     isPowerProduct = True
@@ -89,7 +89,7 @@ class Scraper11st(Scraper):
             driver.find_element_by_xpath(f"//a[text()='{next_page}']").click()
 
     def startScraping(self, searchWords):
-        driver = webdriver.Chrome(ChromeDriverManager().install())
+        driver = WebdriverBuilder.getDriver()
         for searchWord in searchWords:
             self.initSite(driver, searchWord)
             try:

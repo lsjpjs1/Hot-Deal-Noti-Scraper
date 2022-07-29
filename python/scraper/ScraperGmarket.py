@@ -10,6 +10,7 @@ from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
 from .Scraper import Scraper
+from .WebdriverBuilder import WebdriverBuilder
 
 
 class ScraperGmarket(Scraper):
@@ -67,7 +68,7 @@ class ScraperGmarket(Scraper):
         driver.find_element_by_xpath("//a[@class='link__page-next']").click()
 
     def startScraping(self, searchWords):
-        driver = webdriver.Chrome(ChromeDriverManager().install())
+        driver = WebdriverBuilder.getDriver()
         for searchWord in searchWords:
             self.initSite(driver, searchWord)
             try:
