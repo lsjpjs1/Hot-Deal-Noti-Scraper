@@ -1,3 +1,6 @@
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 import json
 import re
 import time
@@ -6,7 +9,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
-from python.scraper.Scraper import Scraper
+from Scraper import Scraper
 
 
 class ScraperGmarket(Scraper):

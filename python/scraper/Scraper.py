@@ -1,8 +1,11 @@
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 import pandas as pd
 
-from RabbitMQ import RabbitMQ
+from ..messagequeue.RabbitMQ import RabbitMQ
 
 
 class Scraper:
