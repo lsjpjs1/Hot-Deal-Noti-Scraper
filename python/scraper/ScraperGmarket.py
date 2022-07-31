@@ -69,14 +69,19 @@ class ScraperGmarket(Scraper):
 
     def startScraping(self, searchWords):
         driver = WebdriverBuilder.getDriver()
-        for searchWord in searchWords:
-            self.initSite(driver, searchWord)
-            try:
-                for i in range(25):
-                    self.collectData(driver)
-                    self.goNextPage(driver)
-                    time.sleep(1)
-            except Exception as e:
-                print(e)
-                continue
+        try:
+            for searchWord in searchWords:
+                self.initSite(driver, searchWord)
+                try:
+                    for i in range(25):
+                        self.collectData(driver)
+                        self.goNextPage(driver)
+                        time.sleep(1)
+                except Exception as e:
+                    print(e)
+                    continue
+        except Exception as e:
+            print(e)
+        finally:
+            driver.quit()
 
