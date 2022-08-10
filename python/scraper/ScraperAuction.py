@@ -37,12 +37,19 @@ class ScraperAuction(Scraper):
         man_won_re = re.compile('([0-9]+)만')
         res = {"hotDealMessages":[]}
         for item in items:
-            original_title = item.find_element_by_xpath(".//span[@class='text--itemcard_title ellipsis']//span[@class='text--title']").text
-            title = original_title.replace(" ", "")
-            url = item.find_element_by_xpath(".//span[@class='text--itemcard_title ellipsis']//a[@class='link--itemcard']").get_attribute("href")
-            original_price = int(
-                item.find_element_by_xpath(".//strong[@class='text--price_seller']").text.replace(",", "")
-            )
+            try:
+                original_title = item.find_element_by_xpath(
+                    ".//span[@class='text--itemcard_title ellipsis']//span[@class='text--title']").text
+                title = original_title.replace(" ", "")
+                url = item.find_element_by_xpath(
+                    ".//span[@class='text--itemcard_title ellipsis']//a[@class='link--itemcard']").get_attribute("href")
+                original_price = int(
+                    item.find_element_by_xpath(".//strong[@class='text--price_seller']").text.replace(",", "")
+                )
+            except Exception as e:
+                print(original_title)
+                print(e)
+                continue
             discount_list = []
             match_comma = comma_won_re.finditer(title)
             match_man = man_won_re.finditer(title)
