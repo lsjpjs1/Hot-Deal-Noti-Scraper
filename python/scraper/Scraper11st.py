@@ -1,5 +1,6 @@
 import os
 import sys
+
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 import json
 import re
@@ -11,6 +12,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 from .Scraper import Scraper
 from .WebdriverBuilder import WebdriverBuilder
+
 
 class Scraper11st(Scraper):
     isPowerProduct = True
@@ -43,7 +45,7 @@ class Scraper11st(Scraper):
 
         comma_won_re = re.compile('([0-9]{1,3}(,[0-9]{3})+)')
         man_won_re = re.compile('([0-9]+)만')
-        res = {"hotDealMessages":[]}
+        res = {"hotDealMessages": []}
         for item in items:
             original_title = item.find_element_by_xpath(".//div[@class='c_prd_name c_prd_name_row_1']").text
             title = item.find_element_by_xpath(".//div[@class='c_prd_name c_prd_name_row_1']").text.replace(" ", "")
@@ -69,7 +71,7 @@ class Scraper11st(Scraper):
                         {
                             "discountRate": discount_list[0][0], "discountPrice": discount_list[0][1],
                             "originalPrice": original_price, "title": original_title,
-                            "url": discount_list[0][2]
+                            "url": discount_list[0][2], "sourceSite": "11번가"
                         }
                     )
         self.mq.publish(json.dumps(res))
@@ -105,6 +107,3 @@ class Scraper11st(Scraper):
             print(e)
         finally:
             driver.quit()
-
-
-

@@ -58,7 +58,7 @@ class ScraperGmarket(Scraper):
                                 {
                                     "discountRate": discount_list[0][0], "discountPrice": discount_list[0][1],
                                     "originalPrice": original_price, "title": original_title,
-                                    "url": discount_list[0][2]
+                                    "url": discount_list[0][2], "sourceSite": "G마켓"
                                 }
                     )
         self.mq.publish(json.dumps(res))
