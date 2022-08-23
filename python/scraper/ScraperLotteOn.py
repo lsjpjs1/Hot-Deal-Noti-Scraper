@@ -64,7 +64,7 @@ class ScraperLotteOn(Scraper):
                 if price_candidate / original_price > 0.5:
                     discount_list.append([int(100 - 100 * price_candidate / original_price), price_candidate, url])
             if discount_list:
-                if 0 <= discount_list[0][0] <= 100:
+                if 15 <= discount_list[0][0] <= 100:
                     res.get("hotDealMessages").append(
                                 {
                                     "discountRate": discount_list[0][0], "discountPrice": discount_list[0][1],
@@ -72,7 +72,8 @@ class ScraperLotteOn(Scraper):
                                     "url": discount_list[0][2], "sourceSite": "롯데ON"
                                 }
                     )
-        self.mq.publish(json.dumps(res))
+        self.mq.publish(json.dumps(res), 'inputHotDeal')
+        # self.mq.publish(json.dumps(res), 'inputKeywordNotification')
 
     def goNextPage(self, driver):
         self.wait(driver, (By.XPATH, "//a[@class='srchPaginationNext']"))

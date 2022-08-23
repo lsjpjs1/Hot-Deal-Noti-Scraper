@@ -17,10 +17,10 @@ class RabbitMQ:
         )
         return
 
-    def publish(self, body):
+    def publish(self, body, routing_key):
         connection = pika.BlockingConnection(
             pika.ConnectionParameters(self.__url, self.__port, self.__vhost, self.__cred))
-        connection.channel().basic_publish(exchange='amq.direct', routing_key='inputHotDeal', body=body)
+        connection.channel().basic_publish(exchange='amq.direct', routing_key=routing_key, body=body)
         connection.close()
 
 
