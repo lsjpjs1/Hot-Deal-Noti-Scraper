@@ -12,7 +12,7 @@ from .ScraperLotteOn import ScraperLotteOn
 from .ScraperAuction import ScraperAuction
 
 searchWords = [
-    "기가바이트 노트북", "asus 노트북", "lg 노트북", "삼성 노트북", "hp 노트북", "레노버 노트북", "델 노트북"
+    "기가바이트 노트북", "asus 노트북", "lg 노트북", "삼성 노트북", "hp 노트북", "레노버 노트북", "델 노트북", "msi 노트북"
 ]
 print(datetime.now(),": 11번가 크롤링 시작합니다!")
 scraper11st = Scraper11st()
