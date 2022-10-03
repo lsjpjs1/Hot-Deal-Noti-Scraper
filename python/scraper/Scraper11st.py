@@ -49,7 +49,7 @@ class Scraper11st(Scraper):
         for item in items:
             try:
                 original_title = item.find_element_by_xpath(".//div[@class='c_prd_name c_prd_name_row_1']").text
-                title = item.find_element_by_xpath(".//div[@class='c_prd_name c_prd_name_row_1']").text.replace(" ", "")
+                title = item.find_element_by_xpath(".//div[@class='c_prd_name c_prd_name_row_1']").text.replace(" ", "").replace(".", "")
                 url = item.find_element_by_xpath(".//div[@class='c_prd_name c_prd_name_row_1']/a").get_attribute("href")
                 original_price = int(
                     item.find_element_by_xpath(".//dd//span[@class='value']").text.replace(",", ""))
