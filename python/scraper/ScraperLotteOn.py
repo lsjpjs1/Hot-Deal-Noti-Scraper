@@ -39,7 +39,7 @@ class ScraperLotteOn(Scraper):
         for item in items:
             try:
                 original_title = item.find_element_by_xpath(".//div[@class='srchProductUnitTitle']").text
-                title = original_title.replace(" ", "")
+                title = original_title.replace(" ", "").replace(".", "")
                 url = item.find_element_by_xpath(".//a[@class='srchGridProductUnitLink']").get_attribute("href")
                 original_price = int(
                     item.find_element_by_xpath(

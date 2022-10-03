@@ -40,7 +40,7 @@ class ScraperAuction(Scraper):
             try:
                 original_title = item.find_element_by_xpath(
                     ".//span[@class='text--itemcard_title ellipsis']//span[@class='text--title']").text
-                title = original_title.replace(" ", "")
+                title = original_title.replace(" ", "").replace(".", "")
                 url = item.find_element_by_xpath(
                     ".//span[@class='text--itemcard_title ellipsis']//a[@class='link--itemcard']").get_attribute("href")
                 original_price = int(

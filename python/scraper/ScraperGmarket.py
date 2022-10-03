@@ -36,7 +36,7 @@ class ScraperGmarket(Scraper):
         for item in items:
             try:
                 original_title = item.find_element_by_xpath(".//span[@class='text__item']").text
-                title = original_title.replace(" ", "")
+                title = original_title.replace(" ", "").replace(".", "")
                 url = item.find_element_by_xpath(".//a[@class='link__item']").get_attribute("href")
                 original_price = int(
                     item.find_element_by_xpath(".//strong[@class='text text__value']").text.replace(",", ""))
