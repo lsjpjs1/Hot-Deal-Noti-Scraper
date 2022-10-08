@@ -11,6 +11,7 @@ from .ScraperGmarket import ScraperGmarket
 from .ScraperLotteOn import ScraperLotteOn
 from .ScraperAuction import ScraperAuction
 from .ScraperHimart import ScraperHimart
+from .ScraperCoupang import ScraperCoupang
 
 
 
@@ -32,3 +33,6 @@ scraper_auction.startScraping(searchWords)
 print(datetime.now(),": 하이마트 크롤링 시작합니다!")
 scraperHimart = ScraperHimart()
 scraperHimart.startScraping(searchWords)
+print(datetime.now(), ": 쿠팡 크롤링 시작합니다!")
+scraperCoupang = ScraperCoupang()
+scraperCoupang.startScraping()
