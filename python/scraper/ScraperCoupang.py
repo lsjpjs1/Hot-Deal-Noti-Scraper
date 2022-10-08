@@ -4,10 +4,8 @@ import os
 import sys
 
 import requests
-from lxml import etree
 from bs4 import BeautifulSoup
 import bs4
-import re
 
 from requests import Response
 from selenium.webdriver.chrome.webdriver import WebDriver
