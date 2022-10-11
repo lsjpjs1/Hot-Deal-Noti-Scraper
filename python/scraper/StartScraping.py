@@ -11,8 +11,6 @@ from .ScraperGmarket import ScraperGmarket
 from .ScraperLotteOn import ScraperLotteOn
 from .ScraperAuction import ScraperAuction
 from .ScraperHimart import ScraperHimart
-from .ScraperCoupang import ScraperCoupang
-
 
 
 searchWords = [
