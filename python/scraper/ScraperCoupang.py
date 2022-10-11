@@ -134,7 +134,7 @@ class ScraperCoupang(Scraper):
                 url = f'https://www.coupang.com/np/categories/497135?listSize=120&page={currentPage}'
                 response = requests.get(url, headers=headers)
                 self.findCandidates(response.text)
-                time.sleep(random.randint(3, 7))
+                time.sleep(random.randint(5, 7))
 
     def checkCandidates(self, driver: WebDriver):
         while self.candidate_products:
@@ -158,7 +158,7 @@ class ScraperCoupang(Scraper):
                     self.mq.publish(json.dumps({"hotDealMessages":[hot_deal]}), 'inputHotDeal')
                 driver.quit()
                 driver = WebdriverBuilder.getDriver()
-                time.sleep(random.randint(3,10))
+                time.sleep(random.randint(5,10))
             except Exception as e:
                 print(e)
                 continue
