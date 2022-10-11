@@ -205,4 +205,6 @@ class ScraperCoupang(Scraper):
             driver.quit()
 
 
-
+print(datetime.now(), ": 쿠팡 크롤링 시작합니다!")
+scraperCoupang = ScraperCoupang()
+scraperCoupang.startScraping()
