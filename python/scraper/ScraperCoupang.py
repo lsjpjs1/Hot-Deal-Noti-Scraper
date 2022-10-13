@@ -131,7 +131,7 @@ class ScraperCoupang(Scraper):
         for currentPage in range(1, 15):
             if not self.is_last_page:
                 print("현재 페이지", currentPage)
-                url = f'https://www.coupang.com/np/categories/497135?listSize=120&page={currentPage}'
+                url = f'https://www.coupang.com/np/categories/497135?listSize=120&filterType=rocket&page={currentPage}'
                 response = requests.get(url, headers=headers)
                 self.findCandidates(response.text)
                 time.sleep(random.randint(5, 7))
