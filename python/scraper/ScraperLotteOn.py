@@ -46,6 +46,7 @@ class ScraperLotteOn(Scraper):
                         ".//strong[@class='s-product-price__final']/span[@class='s-product-price__number']").text.replace(
                         ",", "")
                 )
+                thumbnail_url = item.find_element_by_xpath(".//div[@class='srchThumbImageWrap']//img").get_attribute("src")
             except Exception as e:
                 print(original_title)
                 print(e)
@@ -69,7 +70,8 @@ class ScraperLotteOn(Scraper):
                                 {
                                     "discountRate": discount_list[0][0], "discountPrice": discount_list[0][1],
                                     "originalPrice": original_price, "title": original_title,
-                                    "url": discount_list[0][2], "sourceSite": "롯데ON"
+                                    "url": discount_list[0][2], "sourceSite": "롯데ON",
+                            "hotDealThumbnailUrl": thumbnail_url
                                 }
                     )
         self.mq.publish(json.dumps(res), 'inputHotDeal')

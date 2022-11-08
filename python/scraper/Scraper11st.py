@@ -51,6 +51,7 @@ class Scraper11st(Scraper):
                 original_title = item.find_element_by_xpath(".//div[@class='c_prd_name c_prd_name_row_1']").text
                 title = item.find_element_by_xpath(".//div[@class='c_prd_name c_prd_name_row_1']").text.replace(" ", "").replace(".", "")
                 url = item.find_element_by_xpath(".//div[@class='c_prd_name c_prd_name_row_1']/a").get_attribute("href")
+                thumbnail_url = item.find_element_by_xpath(".//img").get_attribute("src")
                 original_price = int(
                     item.find_element_by_xpath(".//dd//span[@class='value']").text.replace(",", ""))
             except Exception as e:
@@ -76,7 +77,8 @@ class Scraper11st(Scraper):
                         {
                             "discountRate": discount_list[0][0], "discountPrice": discount_list[0][1],
                             "originalPrice": original_price, "title": original_title,
-                            "url": discount_list[0][2], "sourceSite": "11번가"
+                            "url": discount_list[0][2], "sourceSite": "11번가" ,
+                            "hotDealThumbnailUrl" : thumbnail_url
                         }
                     )
         self.mq.publish(json.dumps(res), 'inputHotDeal')

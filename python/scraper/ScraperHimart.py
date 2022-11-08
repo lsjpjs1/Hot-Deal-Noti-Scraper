@@ -53,6 +53,8 @@ class ScraperHimart(Scraper):
                         ",", "")
                 )
                 is_sold_out = len(item.find_elements_by_xpath(".//div[@class='soldout']"))>0
+                thumbnail_url = item.find_element_by_xpath(".//div[@class='prdImg']//img").get_attribute("src")
+
             except Exception as e:
                 print(e)
                 continue
@@ -65,7 +67,8 @@ class ScraperHimart(Scraper):
                             {
                                 "discountRate": discount_rate, "discountPrice": discount_price,
                                 "originalPrice": original_price, "title": original_title,
-                                "url": url, "sourceSite": "하이마트"
+                                "url": url, "sourceSite": "하이마트",
+                            "hotDealThumbnailUrl": thumbnail_url
                             }
                 )
         self.mq.publish(json.dumps(res), 'inputHotDeal')

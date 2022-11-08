@@ -25,14 +25,20 @@ class ScraperGmarket(Scraper):
 
         self.waitDuringTime(driver, (
             By.XPATH,
-            "//div[@class='box__component box__component-itemcard box__component-itemcard--general']//div[@class='box__information-major']"),
+            "//div[@class='box__item-container']"),
                             10)
         items = driver.find_elements_by_xpath(
-            "//div[@class='box__component box__component-itemcard box__component-itemcard--general']//div[@class='box__information-major']")
+            "//div[@class='box__item-container']")
 
         comma_won_re = re.compile('([0-9]{1,3}(,[0-9]{3})+)')
         man_won_re = re.compile('([0-9]+)만')
         res = {"hotDealMessages":[]}
+
+        page_height = driver.execute_script("return document.body.scrollHeight")
+        for i in range(0, page_height, 40):
+            j = i + 1
+            driver.execute_script(f"window.scrollTo({i}, {j})")
+
         for item in items:
             try:
                 original_title = item.find_element_by_xpath(".//span[@class='text__item']").text
@@ -40,6 +46,7 @@ class ScraperGmarket(Scraper):
                 url = item.find_element_by_xpath(".//a[@class='link__item']").get_attribute("href")
                 original_price = int(
                     item.find_element_by_xpath(".//strong[@class='text text__value']").text.replace(",", ""))
+                thumbnail_url = item.find_element_by_xpath(".//img[@class='image__item  ']").get_attribute("src")
             except Exception as e:
                 print(original_title)
                 print(e)
@@ -63,7 +70,8 @@ class ScraperGmarket(Scraper):
                                 {
                                     "discountRate": discount_list[0][0], "discountPrice": discount_list[0][1],
                                     "originalPrice": original_price, "title": original_title,
-                                    "url": discount_list[0][2], "sourceSite": "G마켓"
+                                    "url": discount_list[0][2], "sourceSite": "G마켓",
+                            "hotDealThumbnailUrl" : thumbnail_url
                                 }
                     )
         self.mq.publish(json.dumps(res), 'inputHotDeal')
@@ -71,7 +79,7 @@ class ScraperGmarket(Scraper):
 
     def goNextPage(self, driver):
         self.wait(driver, (By.XPATH, "//a[@class='link__page-next']"))
-        driver.find_element_by_xpath("//a[@class='link__page-next']").click()
+        driver.execute_script("arguments[0].click();", driver.find_element_by_xpath("//a[@class='link__page-next']"))
 
     def startScraping(self, searchWords):
         driver = WebdriverBuilder.getDriver()

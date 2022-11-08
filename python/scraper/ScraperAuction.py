@@ -1,8 +1,6 @@
 import os
 import sys
 
-
-
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 import json
 import re
@@ -11,7 +9,6 @@ import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
-
 from .Scraper import Scraper
 from .WebdriverBuilder import WebdriverBuilder
 
@@ -28,14 +25,20 @@ class ScraperAuction(Scraper):
 
         self.waitDuringTime(driver, (
             By.XPATH,
-            "//div[@class='section--itemcard_info']"),
+            "//div[@class='section--itemcard']"),
                             10)
         items = driver.find_elements_by_xpath(
-            "//div[@class='section--itemcard_info']")
+            "//div[@class='section--itemcard']")
 
         comma_won_re = re.compile('([0-9]{1,3}(,[0-9]{3})+)')
         man_won_re = re.compile('([0-9]+)만')
-        res = {"hotDealMessages":[]}
+        res = {"hotDealMessages": []}
+
+        page_height = driver.execute_script("return document.body.scrollHeight")
+        for i in range(0, page_height, 40):
+            j = i + 1
+            driver.execute_script(f"window.scrollTo({i}, {j})")
+
         for item in items:
             try:
                 original_title = item.find_element_by_xpath(
@@ -46,6 +49,7 @@ class ScraperAuction(Scraper):
                 original_price = int(
                     item.find_element_by_xpath(".//strong[@class='text--price_seller']").text.replace(",", "")
                 )
+                thumbnail_url = item.find_element_by_xpath(".//img[@class='image--itemcard  ']").get_attribute("src")
             except Exception as e:
                 print(original_title)
                 print(e)
@@ -66,18 +70,19 @@ class ScraperAuction(Scraper):
             if discount_list:
                 if 15 <= discount_list[0][0] <= 100:
                     res.get("hotDealMessages").append(
-                                {
-                                    "discountRate": discount_list[0][0], "discountPrice": discount_list[0][1],
-                                    "originalPrice": original_price, "title": original_title,
-                                    "url": discount_list[0][2], "sourceSite": "옥션"
-                                }
+                        {
+                            "discountRate": discount_list[0][0], "discountPrice": discount_list[0][1],
+                            "originalPrice": original_price, "title": original_title,
+                            "url": discount_list[0][2], "sourceSite": "옥션",
+                            "hotDealThumbnailUrl": thumbnail_url
+                        }
                     )
         self.mq.publish(json.dumps(res), 'inputHotDeal')
         # self.mq.publish(json.dumps(res), 'inputKeywordNotification')
 
     def goNextPage(self, driver):
         self.wait(driver, (By.XPATH, "//a[@class='link--next_page']"))
-        driver.find_element_by_xpath("//a[@class='link--next_page']").click()
+        driver.execute_script("arguments[0].click();",driver.find_element_by_xpath("//a[@class='link--next_page']"))
 
     def startScraping(self, searchWords):
         driver = WebdriverBuilder.getDriver()
@@ -96,4 +101,3 @@ class ScraperAuction(Scraper):
             print(e)
         finally:
             driver.quit()
-
