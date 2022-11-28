@@ -126,7 +126,7 @@ class ScraperCoupang(Scraper):
             return False
         if product_preview.is_more_discount_exist:
             return True
-        if product_preview.normal_card_total_discount_percent >= 15:
+        if product_preview.normal_card_total_discount_percent >= 10:
             return True
         return False
 
@@ -154,7 +154,7 @@ class ScraperCoupang(Scraper):
                 card_discount_amount = self.getCardDiscountAmount(driver, candidate_product)
                 total_discount_amount = candidate_product.original_price - candidate_product.normal_discount_price + more_discount_amount + card_discount_amount
                 total_discount_percent = int(total_discount_amount / candidate_product.original_price * 100)
-                if 15 <= total_discount_percent <= 100:
+                if 10 <= total_discount_percent <= 100:
                     hot_deal = {
                         "discountRate": total_discount_percent,
                         "discountPrice": candidate_product.original_price - total_discount_amount,

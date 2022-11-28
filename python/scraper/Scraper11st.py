@@ -72,14 +72,16 @@ class Scraper11st(Scraper):
                 if price_candidate / original_price > 0.5:
                     discount_list.append([int(100 - 100 * price_candidate / original_price), price_candidate, url])
             if discount_list:
-                if 15 <= discount_list[0][0] <= 100:
-                    res.get("hotDealMessages").append(
-                        {
+                if 10 <= discount_list[0][0] <= 100:
+                    hot_deal = {
                             "discountRate": discount_list[0][0], "discountPrice": discount_list[0][1],
                             "originalPrice": original_price, "title": original_title,
                             "url": discount_list[0][2], "sourceSite": "11번가" ,
                             "hotDealThumbnailUrl" : thumbnail_url
                         }
+                    print(hot_deal)
+                    res.get("hotDealMessages").append(
+                        hot_deal
                     )
         self.mq.publish(json.dumps(res), 'inputHotDeal')
         # self.mq.publish(json.dumps(res), 'inputKeywordNotification')
