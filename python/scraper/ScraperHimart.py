@@ -62,7 +62,7 @@ class ScraperHimart(Scraper):
                 continue
             discount_rate=int(100 - 100 * discount_price / original_price)
 
-            if 10 <= discount_rate <= 100:
+            if 15 <= discount_rate <= 100:
                 res.get("hotDealMessages").append(
                             {
                                 "discountRate": discount_rate, "discountPrice": discount_price,
