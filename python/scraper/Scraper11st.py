@@ -37,6 +37,7 @@ class Scraper11st(Scraper):
                     "//section[@data-log-actionid-area='plus']//div[@class='c_card c_card_list']")
             except:
                 self.isPowerProduct = False
+                print("except1")
         if not self.isPowerProduct:
             self.waitDuringTime(driver, (
                 By.XPATH, "//section[@data-log-actionid-area='common']//div[@class='c_card c_card_list']"), 10)
@@ -47,6 +48,7 @@ class Scraper11st(Scraper):
         man_won_re = re.compile('([0-9]+)만')
         res = {"hotDealMessages": []}
         for item in items:
+            sub_title = None
             try:
                 original_title = item.find_element_by_xpath(".//div[@class='c_prd_name c_prd_name_row_1']").text
                 title = item.find_element_by_xpath(".//div[@class='c_prd_name c_prd_name_row_1']").text.replace(" ", "").replace(".", "")
@@ -54,11 +56,18 @@ class Scraper11st(Scraper):
                 thumbnail_url = item.find_element_by_xpath(".//img").get_attribute("src")
                 original_price = int(
                     item.find_element_by_xpath(".//dd//span[@class='value']").text.replace(",", ""))
+
+                try:
+                    sub_title = item.find_element_by_xpath(".//div[@class='c_prd_advertise']").text.replace(" ", "").replace(".", "")
+                except Exception as e:
+                    print("except2")
             except Exception as e:
                 print(original_title)
                 print(e)
+                print("except3")
                 continue
             discount_list = []
+
             match_comma = comma_won_re.finditer(title)
             match_man = man_won_re.finditer(title)
             price_candidates = []
@@ -68,6 +77,18 @@ class Scraper11st(Scraper):
             if match_man:
                 for man_won in match_man:
                     price_candidates.append(int(man_won[1]) * 10000)
+
+            #부제에서 특가정보 긁어오는 부분
+            if sub_title:
+                match_comma_sub = comma_won_re.finditer(sub_title)
+                match_man_sub = man_won_re.finditer(sub_title)
+                if match_comma_sub:
+                    for comma_won in match_comma_sub:
+                        price_candidates.append(int(comma_won[0].replace(",", "")))
+                if match_man_sub:
+                    for man_won in match_man_sub:
+                        price_candidates.append(int(man_won[1]) * 10000)
+
             for price_candidate in price_candidates:
                 if price_candidate / original_price > 0.5:
                     discount_list.append([int(100 - 100 * price_candidate / original_price), price_candidate, url])
@@ -112,8 +133,10 @@ class Scraper11st(Scraper):
                         time.sleep(1)
                 except Exception as e:
                     print(e)
+                    print("except4")
                     continue
         except Exception as e:
             print(e)
+            print("except5")
         finally:
             driver.quit()
