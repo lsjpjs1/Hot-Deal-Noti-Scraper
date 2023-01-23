@@ -26,7 +26,7 @@ from .WebdriverBuilder import WebdriverBuilder
 class ProductPreview:
     def __init__(self, product_title, product_url, original_price, normal_discount_price, card_discount_percent,
                  normal_card_total_discount_percent,
-                 is_more_discount_exist, thumbnail_url):
+                 is_more_discount_exist, thumbnail_url,check_more_discount):
         self.product_title = product_title
         self.product_url = product_url
         self.original_price = original_price
@@ -35,6 +35,7 @@ class ProductPreview:
         self.normal_card_total_discount_percent = normal_card_total_discount_percent
         self.is_more_discount_exist = is_more_discount_exist
         self.thumbnail_url = thumbnail_url
+        self.check_more_discount = check_more_discount
 
     def __str__(self):
         return self.product_title + "\n" + self.product_url + "\n" + str(self.original_price) + "\n" + str(
@@ -111,13 +112,19 @@ class ScraperCoupang(Scraper):
             if item.find("span", {"class": "badge badge-benefit"}) is not None:
                 is_more_discount_exist = True
 
+            check_more_discount = False
+            if item.find("span", {"class": "badge badge-benefit"}) is not None and item.find("span", {"class": "instant-discount-text"}) is not None:
+                instant_discount_text = item.find("span", {"class": "instant-discount-text"}).get_text()
+                if len(re.findall("와우쿠폰",instant_discount_text))==0:
+                    check_more_discount  = True
+
             thumbnail_url = ""
             if item.find("dt", {"class": "image"}) is not None:
                 thumbnail_url = "https:" + item.find("dt", {"class": "image"}).find("img")["src"]
 
             product_preview = ProductPreview(product_title, product_url, original_price, normal_discount_price,
                                              card_discount_percent,
-                                             normal_card_total_discount_percent, is_more_discount_exist, thumbnail_url)
+                                             normal_card_total_discount_percent, is_more_discount_exist, thumbnail_url, check_more_discount)
             if self.validateCandidate(product_preview):
                 self.candidate_products.append(product_preview)
 
@@ -126,19 +133,20 @@ class ScraperCoupang(Scraper):
             return False
         if product_preview.is_more_discount_exist:
             return True
-        if product_preview.normal_card_total_discount_percent >= 10:
+        if product_preview.normal_card_total_discount_percent >= 15:
             return True
         return False
 
     def collectCandidate(self):
         headers = {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
-            "Accept-Language": "ko-KR,ko;q=0.8,en-US;q=0.5,en;q=0.3"
+            "Accept-Language": "ko-KR,ko;q=0.8,en-US;q=0.5,en;q=0.3",
+            'Cache-Control': 'no-cache'
         }
-        for currentPage in range(1, 15):
+        for currentPage in range(1, 30):
             if not self.is_last_page:
                 print("현재 페이지", currentPage)
-                url = f'https://www.coupang.com/np/categories/497135?listSize=120&filterType=rocket&page={currentPage}'
+                url = f'https://www.coupang.com/np/categories/497135?listSize=120&brand=&offerCondition=&filterType=rocket%2Crocket&isPriceRange=false&minPrice=&maxPrice=&page={currentPage}&channel=user&fromComponent=N&selectedPlpKeepFilter=&sorter=bestAsc&filter=&component=497035&rating=0&rocketAll=true'
                 response = requests.get(url, headers=headers)
                 self.findCandidates(response.text)
                 time.sleep(random.randint(5, 7))
@@ -150,11 +158,18 @@ class ScraperCoupang(Scraper):
             try:
                 candidate_product: ProductPreview = self.candidate_products.pop()
                 driver.get(candidate_product.product_url)
-                more_discount_amount = self.getMoreDiscountAmount(driver, candidate_product)
+
+                more_discount_amount = 0
+                if candidate_product.check_more_discount:
+                    more_discount_amount = self.getMoreDiscountAmount(driver, candidate_product)
+
                 card_discount_amount = self.getCardDiscountAmount(driver, candidate_product)
                 total_discount_amount = candidate_product.original_price - candidate_product.normal_discount_price + more_discount_amount + card_discount_amount
                 total_discount_percent = int(total_discount_amount / candidate_product.original_price * 100)
-                if 10 <= total_discount_percent <= 100:
+                if 15 <= total_discount_percent <= 100:
+                    print(
+                        f"total_discount_amount({total_discount_amount}) = original_price({candidate_product.original_price})-"
+                        f"normal_discount_price({candidate_product.normal_discount_price})+more_discount_amount({more_discount_amount})+card_discount_amount({card_discount_amount})")
                     hot_deal = {
                         "discountRate": total_discount_percent,
                         "discountPrice": candidate_product.original_price - total_discount_amount,
