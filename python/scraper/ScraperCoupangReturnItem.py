@@ -24,9 +24,13 @@ from .WebdriverBuilder import WebdriverBuilder
 from .CoupangPartnersLinkGenerator import CoupangPartnersLinkGenerator
 
 class ProductPreview:
+    NORMAL = "NORMAL"
+    SOLD_OUT = "SOLD_OUT"
+    ONLY_RETURN = "ONLY_RETURN"
+
     def __init__(self, product_title, product_url, original_price, normal_discount_price, card_discount_percent,
                  normal_card_total_discount_percent,
-                 is_more_discount_exist, thumbnail_url,check_more_discount):
+                 is_more_discount_exist, thumbnail_url, check_more_discount, sale_status):
         self.product_title = product_title
         self.product_url = product_url
         self.original_price = original_price
@@ -36,11 +40,13 @@ class ProductPreview:
         self.is_more_discount_exist = is_more_discount_exist
         self.thumbnail_url = thumbnail_url
         self.check_more_discount = check_more_discount
+        self.sale_status = sale_status
 
     def __str__(self):
         return self.product_title + "\n" + self.product_url + "\n" + str(self.original_price) + "\n" + str(
             self.card_discount_percent) + "\n" + str(self.normal_card_total_discount_percent) + "\n" + str(
-            self.is_more_discount_exist) + "\n" + str(self.thumbnail_url) + "\n\n"
+            self.is_more_discount_exist) + "\n" + str(self.thumbnail_url) + "\n" + str(
+            self.check_more_discount) + "\n" + str(self.sale_status) + "\n\n"
 
 
 class ScraperCoupang(Scraper):
@@ -50,7 +56,7 @@ class ScraperCoupang(Scraper):
 
     def findCandidates(self, html: str):
         soup = BeautifulSoup(html, 'html.parser')
-        items = soup.find_all("li", {"class": "baby-product renew-badge"})
+        items = soup.find_all(class_=re.compile('baby-product renew-badge'))
 
         # 마지막 페이지 플래그 세팅
         if items is None:
@@ -84,7 +90,7 @@ class ScraperCoupang(Scraper):
             elif second_price is not None:
                 original_price = second_price
             else:
-                continue
+                pass
 
             normal_discount_price = original_price
             if second_price is not None:
@@ -113,29 +119,28 @@ class ScraperCoupang(Scraper):
                 is_more_discount_exist = True
 
             check_more_discount = False
-            if item.find("span", {"class": "badge badge-benefit"}) is not None and item.find("span", {"class": "instant-discount-text"}) is not None:
+            if item.find("span", {"class": "badge badge-benefit"}) is not None and item.find("span", {
+                "class": "instant-discount-text"}) is not None:
                 instant_discount_text = item.find("span", {"class": "instant-discount-text"}).get_text()
-                if len(re.findall("와우쿠폰",instant_discount_text))==0:
-                    check_more_discount  = True
+                if len(re.findall("와우쿠폰", instant_discount_text)) == 0:
+                    check_more_discount = True
 
             thumbnail_url = ""
             if item.find("dt", {"class": "image"}) is not None:
                 thumbnail_url = "https:" + item.find("dt", {"class": "image"}).find("img")["src"]
 
+            sale_status = ProductPreview.NORMAL
+            if item.find("div", {"class": "out-of-stock"}) is not None:
+                sale_status = ProductPreview.SOLD_OUT
+            if item.find("strong", {"class": "price-value"}) is None:
+                sale_status = ProductPreview.ONLY_RETURN
+
             product_preview = ProductPreview(product_title, product_url, original_price, normal_discount_price,
                                              card_discount_percent,
-                                             normal_card_total_discount_percent, is_more_discount_exist, thumbnail_url, check_more_discount)
-            if self.validateCandidate(product_preview):
-                self.candidate_products.append(product_preview)
-
-    def validateCandidate(self, product_preview: ProductPreview):
-        if product_preview.original_price < 200000:
-            return False
-        if product_preview.is_more_discount_exist:
-            return True
-        if product_preview.normal_card_total_discount_percent >= 15:
-            return True
-        return False
+                                             normal_card_total_discount_percent, is_more_discount_exist, thumbnail_url,
+                                             check_more_discount, sale_status)
+            print(product_preview)
+            self.candidate_products.append(product_preview)
 
     def collectCandidate(self):
         headers = {
@@ -143,10 +148,11 @@ class ScraperCoupang(Scraper):
             "Accept-Language": "ko-KR,ko;q=0.8,en-US;q=0.5,en;q=0.3",
             'Cache-Control': 'no-cache'
         }
-        for currentPage in range(1, 30):
+        target_page = int(sys.argv[1])
+        for currentPage in range(target_page, target_page+1):
             if not self.is_last_page:
                 print("현재 페이지", currentPage)
-                url = f'https://www.coupang.com/np/categories/497135?listSize=120&brand=&offerCondition=&filterType=rocket%2Crocket&isPriceRange=false&minPrice=&maxPrice=&page={currentPage}&channel=user&fromComponent=N&selectedPlpKeepFilter=&sorter=bestAsc&filter=&component=497035&rating=0&rocketAll=true'
+                url = f'https://www.coupang.com/np/categories/497135?listSize=120&brand=&offerCondition=PACKAGE_DAMAGED%2CNON_ACTIVATED%2CREPACKAGING%2CREFURBISHED%2CUSED%2CRETURN&filterType=rocket%2Crocket_wow%2Ccoupang_global&isPriceRange=false&minPrice=&maxPrice=&page={currentPage}&channel=user&fromComponent=N&selectedPlpKeepFilter=&sorter=bestAsc&filter=&component=497035&rating=0&rocketAll=true'
                 response = requests.get(url, headers=headers)
                 self.findCandidates(response.text)
                 time.sleep(random.randint(5, 7))
@@ -157,41 +163,79 @@ class ScraperCoupang(Scraper):
             print(f"현재 {self.item_count} 번째 아이템")
             try:
                 candidate_product: ProductPreview = self.candidate_products.pop()
-                driver.get(candidate_product.product_url)
+                product_id = re.search('products/(\d+)', candidate_product.product_url).group(1)
+                item_id = re.search('itemId=(\d+)', candidate_product.product_url).group(1)
+                vendor_item_id = re.search('vendorItemId=(\d+)', candidate_product.product_url).group(1)
+                url = f"https://www.coupang.com/vp/products/{product_id}/item/{item_id}/offerList?vendorItemId={vendor_item_id}&totalCount="
+                driver.get(url)
+                self.waitDuringTime(driver, (By.XPATH, "//tr[@class='offer-item']"), 10)
+                soup = BeautifulSoup(driver.page_source, 'html.parser')
+                driver.quit()
+                driver = WebdriverBuilder.getDriver()
+                item = soup.find("tr", {"class": "offer-item"})
+                # 정상 케이스 - 일반 쿠팡 크롤링 하는 과정 거친 가격과 비교
+                if candidate_product.sale_status == ProductPreview.NORMAL:
+                    original_price = self.getDiscountPrice(driver, candidate_product)
+                    driver.quit()
+                    driver = WebdriverBuilder.getDriver()
+                # 품절 케이스 - 반품 화면에 적혀있는 가격으로만 가져옴
+                elif candidate_product.sale_status == ProductPreview.SOLD_OUT:
+                    original_price = int(
+                        item.find("span", {"class": "prod-sale-original__price"}).get_text().replace(",", "").replace(
+                            " ", "").replace("원", ""))
+                # 반품 상품만 있는 케이스 - 반품 화면에 적혀있는 가격으로만 가져옴
+                elif candidate_product.sale_status == ProductPreview.ONLY_RETURN:
+                    original_price = int(
+                        item.find("span", {"class": "prod-sale-original__price"}).get_text().replace(",", "").replace(
+                            " ", "").replace("원", ""))
 
-                more_discount_amount = 0
-                if candidate_product.check_more_discount:
-                    more_discount_amount = self.getMoreDiscountAmount(driver, candidate_product)
+                discount_price = int(
+                    item.find("div", {"class": "prod-coupon-price"}).get_text().replace(",", "").replace(" ",
+                                                                                                         "").replace(
+                        "원", ""))
+                discount_percent = 100 - int(discount_price * 100 / original_price)
 
-                card_discount_amount = self.getCardDiscountAmount(driver, candidate_product)
-                total_discount_amount = candidate_product.original_price - candidate_product.normal_discount_price + more_discount_amount + card_discount_amount
-                total_discount_percent = int(total_discount_amount / candidate_product.original_price * 100)
-                if 15 <= total_discount_percent <= 100:
-                    print(
-                        f"total_discount_amount({total_discount_amount}) = original_price({candidate_product.original_price})-"
-                        f"normal_discount_price({candidate_product.normal_discount_price})+more_discount_amount({more_discount_amount})+card_discount_amount({card_discount_amount})")
+                return_item_quality = item.find("span", {"class": "offer-item-status-label"}).get_text()
+                return_item_quality_detail = item.find("span", {"class": "offer-item-usage-label"}).get_text()
+                return_item_url = "https://www.coupang.com" + item.find("a", {"class": "offer-list-link"})["href"]
 
-                    coupang_url = candidate_product.product_url
+                if 15 <= discount_percent <= 100 and return_item_quality != "새 상품":
+
                     try:
-                        coupang_url = CoupangPartnersLinkGenerator.getCoupangPartnersLink(coupang_url)
+                        return_item_url = CoupangPartnersLinkGenerator.getCoupangPartnersLink(return_item_url)
                     except Exception as e:
                         print(e)
-
+                    print(return_item_url)
                     hot_deal = {
-                        "discountRate": total_discount_percent,
-                        "discountPrice": candidate_product.original_price - total_discount_amount,
-                        "originalPrice": candidate_product.original_price, "title": candidate_product.product_title,
-                        "url": coupang_url, "sourceSite": "쿠팡",
-                        "hotDealThumbnailUrl": candidate_product.thumbnail_url
+                        "discountRate": discount_percent,
+                        "discountPrice": discount_price,
+                        "originalPrice": original_price, "title": candidate_product.product_title,
+                        "url": return_item_url, "sourceSite": "쿠팡",
+                        "hotDealThumbnailUrl": candidate_product.thumbnail_url,
+                        "returnItemQuality": return_item_quality,
+                        "returnItemQualityDetail": return_item_quality_detail,
+                        "returnItemSaleStatus": candidate_product.sale_status
                     }
                     print(hot_deal)
                     self.mq.publish(json.dumps({"hotDealMessages": [hot_deal]}), 'inputHotDeal')
-                driver.quit()
-                driver = WebdriverBuilder.getDriver()
-                time.sleep(random.randint(5, 10))
             except Exception as e:
+                print(candidate_product.product_title)
                 print(e)
+                driver = WebdriverBuilder.getDriver()
                 continue
+
+    def getDiscountPrice(self, driver: WebDriver, candidate_product: ProductPreview):
+        driver.get(candidate_product.product_url)
+
+        more_discount_amount = 0
+        if candidate_product.check_more_discount:
+            more_discount_amount = self.getMoreDiscountAmount(driver, candidate_product)
+
+        card_discount_amount = self.getCardDiscountAmount(driver, candidate_product)
+        total_discount_amount = candidate_product.original_price - candidate_product.normal_discount_price + more_discount_amount + card_discount_amount
+        total_discount_percent = int(total_discount_amount / candidate_product.original_price * 100)
+        discount_price = candidate_product.original_price - total_discount_amount
+        return discount_price
 
     def getCardDiscountAmount(self, driver: WebDriver, product: ProductPreview):
         if product.card_discount_percent != 0:
@@ -237,7 +281,9 @@ class ScraperCoupang(Scraper):
         finally:
             driver.quit()
 
-
-print(datetime.now(), ": 쿠팡 크롤링 시작합니다!")
+start_time = datetime.now()
+print(datetime.now(), f": 쿠팡 반품 {sys.argv[1]}페이지 크롤링 시작합니다!")
 scraperCoupang = ScraperCoupang()
 scraperCoupang.startScraping()
+print("시작시간 : ",start_time)
+print(datetime.now(), f": 쿠팡 반품 {sys.argv[1]}페이지 크롤링 종료합니다!")
