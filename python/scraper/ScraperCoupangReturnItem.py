@@ -200,11 +200,11 @@ class ScraperCoupang(Scraper):
 
                 if 15 <= discount_percent <= 100 and return_item_quality != "새 상품":
 
-                    try:
-                        return_item_url = CoupangPartnersLinkGenerator.getCoupangPartnersLink(return_item_url)
-                    except Exception as e:
-                        print(e)
-                    print(return_item_url)
+                    # try:
+                    #     return_item_url = CoupangPartnersLinkGenerator.getCoupangPartnersLink(return_item_url)
+                    # except Exception as e:
+                    #     print(e)
+                    # print(return_item_url)
                     hot_deal = {
                         "discountRate": discount_percent,
                         "discountPrice": discount_price,

@@ -172,10 +172,10 @@ class ScraperCoupang(Scraper):
                         f"normal_discount_price({candidate_product.normal_discount_price})+more_discount_amount({more_discount_amount})+card_discount_amount({card_discount_amount})")
 
                     coupang_url = candidate_product.product_url
-                    try:
-                        coupang_url = CoupangPartnersLinkGenerator.getCoupangPartnersLink(coupang_url)
-                    except Exception as e:
-                        print(e)
+                    # try:
+                    #     coupang_url = CoupangPartnersLinkGenerator.getCoupangPartnersLink(coupang_url)
+                    # except Exception as e:
+                    #     print(e)
 
                     hot_deal = {
                         "discountRate": total_discount_percent,
