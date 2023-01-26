@@ -152,13 +152,14 @@ class ScraperCoupang(Scraper):
         for currentPage in range(target_page, target_page+1):
             if not self.is_last_page:
                 print("현재 페이지", currentPage)
-                url = f'https://www.coupang.com/np/categories/497135?listSize=120&brand=&offerCondition=PACKAGE_DAMAGED%2CNON_ACTIVATED%2CREPACKAGING%2CREFURBISHED%2CUSED%2CRETURN&filterType=rocket%2Crocket_wow%2Ccoupang_global&isPriceRange=false&minPrice=&maxPrice=&page={currentPage}&channel=user&fromComponent=N&selectedPlpKeepFilter=&sorter=bestAsc&filter=&component=497035&rating=0&rocketAll=true'
+                url = f'https://www.coupang.com/np/categories/497135?listSize=120&brand=42308%2C259%2C263%2C6619%2C258%2C17000%2C257%2C16890%2C17031%2C17350&offerCondition=PACKAGE_DAMAGED%2CNON_ACTIVATED%2CREPACKAGING%2CREFURBISHED%2CUSED%2CRETURN&filterType=rocket%2Crocket_wow%2Ccoupang_global&isPriceRange=false&minPrice=&maxPrice=&page={currentPage}&channel=user&fromComponent=N&selectedPlpKeepFilter=&sorter=bestAsc&filter=&component=497035&rating=0&rocketAll=true'
                 response = requests.get(url, headers=headers)
                 self.findCandidates(response.text)
                 time.sleep(random.randint(5, 7))
 
     def checkCandidates(self, driver: WebDriver):
         while self.candidate_products:
+            time.sleep(1)
             self.item_count = self.item_count + 1
             print(f"현재 {self.item_count} 번째 아이템")
             try:
@@ -166,13 +167,17 @@ class ScraperCoupang(Scraper):
                 product_id = re.search('products/(\d+)', candidate_product.product_url).group(1)
                 item_id = re.search('itemId=(\d+)', candidate_product.product_url).group(1)
                 vendor_item_id = re.search('vendorItemId=(\d+)', candidate_product.product_url).group(1)
-                url = f"https://www.coupang.com/vp/products/{product_id}/item/{item_id}/offerList?vendorItemId={vendor_item_id}&totalCount="
-                driver.get(url)
-                self.waitDuringTime(driver, (By.XPATH, "//tr[@class='offer-item']"), 10)
-                soup = BeautifulSoup(driver.page_source, 'html.parser')
-                driver.quit()
-                driver = WebdriverBuilder.getDriver()
-                item = soup.find("tr", {"class": "offer-item"})
+
+                headers = {
+                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
+                    "Accept-Language": "ko-KR,ko;q=0.8,en-US;q=0.5,en;q=0.3",
+                    'Cache-Control': 'no-cache',
+                    "Pragma": "no-cache",
+                }
+                url = f'https://www.coupang.com/vp/products/{product_id}/item/{item_id}/offers?selectedVendorItemId={vendor_item_id}'
+                response = requests.get(url, headers=headers)
+                return_item_info_json = response.json()['vendorItems'][0]
+
                 # 정상 케이스 - 일반 쿠팡 크롤링 하는 과정 거친 가격과 비교
                 if candidate_product.sale_status == ProductPreview.NORMAL:
                     original_price = self.getDiscountPrice(driver, candidate_product)
@@ -180,24 +185,18 @@ class ScraperCoupang(Scraper):
                     driver = WebdriverBuilder.getDriver()
                 # 품절 케이스 - 반품 화면에 적혀있는 가격으로만 가져옴
                 elif candidate_product.sale_status == ProductPreview.SOLD_OUT:
-                    original_price = int(
-                        item.find("span", {"class": "prod-sale-original__price"}).get_text().replace(",", "").replace(
-                            " ", "").replace("원", ""))
+                    original_price = int(return_item_info_json["vendorItemSaleInfo"]["salePrice"])
                 # 반품 상품만 있는 케이스 - 반품 화면에 적혀있는 가격으로만 가져옴
                 elif candidate_product.sale_status == ProductPreview.ONLY_RETURN:
-                    original_price = int(
-                        item.find("span", {"class": "prod-sale-original__price"}).get_text().replace(",", "").replace(
-                            " ", "").replace("원", ""))
+                    original_price = int(int(return_item_info_json["vendorItemSaleInfo"]["salePrice"]))
 
-                discount_price = int(
-                    item.find("div", {"class": "prod-coupon-price"}).get_text().replace(",", "").replace(" ",
-                                                                                                         "").replace(
-                        "원", ""))
+                discount_price = int(int(return_item_info_json["vendorItemSaleInfo"]["couponPrice"]))
                 discount_percent = 100 - int(discount_price * 100 / original_price)
 
-                return_item_quality = item.find("span", {"class": "offer-item-status-label"}).get_text()
-                return_item_quality_detail = item.find("span", {"class": "offer-item-usage-label"}).get_text()
-                return_item_url = "https://www.coupang.com" + item.find("a", {"class": "offer-list-link"})["href"]
+                return_item_quality = return_item_info_json["badgeMap"]["OFFER_BADGE"]["text"]
+                return_item_quality_detail = return_item_info_json["badgeMap"]["USAGE_BADGE"]["text"]
+                return_item_vendor_item_id = str(return_item_info_json["vendorItemId"])
+                return_item_url = f"https://www.coupang.com/vp/products/{product_id}?itemId={item_id}&vendorItemId={return_item_vendor_item_id}&landingType=USED_DETAIL"
 
                 if 15 <= discount_percent <= 100 and return_item_quality != "새 상품":
 
