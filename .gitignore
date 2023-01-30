@@ -4,6 +4,8 @@ python/comma_won/
 python/man_won/
 .env
 startScraping.sh
+startCoupangReturnItemScraping.sh
+startCoupangScraping.sh
 
 # Created by https://www.toptal.com/developers/gitignore/api/pycharm
 # Edit at https://www.toptal.com/developers/gitignore?templates=pycharm

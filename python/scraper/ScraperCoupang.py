@@ -237,7 +237,9 @@ class ScraperCoupang(Scraper):
         finally:
             driver.quit()
 
-
+start_time = datetime.now()
 print(datetime.now(), ": 쿠팡 크롤링 시작합니다!")
 scraperCoupang = ScraperCoupang()
 scraperCoupang.startScraping()
+print("시작시간 : ",start_time)
+print(datetime.now(), f": 쿠팡 크롤링 종료합니다!")
