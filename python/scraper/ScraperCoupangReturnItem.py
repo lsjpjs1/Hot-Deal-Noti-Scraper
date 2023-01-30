@@ -2,6 +2,7 @@ import random
 from datetime import datetime
 import os
 import sys
+import traceback
 
 import requests
 from bs4 import BeautifulSoup
@@ -139,7 +140,6 @@ class ScraperCoupang(Scraper):
                                              card_discount_percent,
                                              normal_card_total_discount_percent, is_more_discount_exist, thumbnail_url,
                                              check_more_discount, sale_status)
-            print(product_preview)
             self.candidate_products.append(product_preview)
 
     def collectCandidate(self):
@@ -159,7 +159,7 @@ class ScraperCoupang(Scraper):
 
     def checkCandidates(self, driver: WebDriver):
         while self.candidate_products:
-            time.sleep(1)
+            time.sleep(2)
             self.item_count = self.item_count + 1
             print(f"현재 {self.item_count} 번째 아이템")
             try:
@@ -219,6 +219,7 @@ class ScraperCoupang(Scraper):
                     self.mq.publish(json.dumps({"hotDealMessages": [hot_deal]}), 'inputHotDeal')
             except Exception as e:
                 print(candidate_product.product_title)
+                traceback.print_exc()
                 print(e)
                 driver = WebdriverBuilder.getDriver()
                 continue
