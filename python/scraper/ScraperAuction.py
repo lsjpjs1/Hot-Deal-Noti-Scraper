@@ -5,7 +5,7 @@ sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 import json
 import re
 import time
-
+import traceback
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
@@ -52,7 +52,7 @@ class ScraperAuction(Scraper):
                 thumbnail_url = item.find_element_by_xpath(".//img[@class='image--itemcard  ']").get_attribute("src")
             except Exception as e:
                 print(original_title)
-                print(e)
+                traceback.print_exc()
                 continue
             discount_list = []
             match_comma = comma_won_re.finditer(title)
@@ -90,16 +90,18 @@ class ScraperAuction(Scraper):
         driver = WebdriverBuilder.getDriver()
         try:
             for searchWord in searchWords:
+                print(f"현재검색어 {searchWord}")
                 self.initSite(driver, searchWord)
                 try:
                     for i in range(15):
+                        print(driver.find_element_by_xpath("//span[@class='link--page on']").text+"페이지")
                         self.collectData(driver)
                         self.goNextPage(driver)
                         time.sleep(1)
                 except Exception as e:
-                    print(e)
+                    traceback.print_exc()
                     continue
         except Exception as e:
-            print(e)
+            traceback.print_exc()
         finally:
             driver.quit()

@@ -5,6 +5,7 @@ sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 import json
 import re
 import time
+import traceback
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -35,9 +36,9 @@ class Scraper11st(Scraper):
                     By.XPATH, "//section[@data-log-actionid-area='plus']//div[@class='c_card c_card_list']"), 10)
                 items = driver.find_elements_by_xpath(
                     "//section[@data-log-actionid-area='plus']//div[@class='c_card c_card_list']")
-            except:
+            except Exception as e:
                 self.isPowerProduct = False
-                print("except1")
+                print("파워상품->일반상품 전환")
         if not self.isPowerProduct:
             self.waitDuringTime(driver, (
                 By.XPATH, "//section[@data-log-actionid-area='common']//div[@class='c_card c_card_list']"), 10)
@@ -60,11 +61,10 @@ class Scraper11st(Scraper):
                 try:
                     sub_title = item.find_element_by_xpath(".//div[@class='c_prd_advertise']").text.replace(" ", "").replace(".", "")
                 except Exception as e:
-                    print("except2")
+                    print("부제목 없음")
             except Exception as e:
-                print(original_title)
                 print(e)
-                print("except3")
+                traceback.print_exc()
                 continue
             discount_list = []
 
@@ -113,6 +113,7 @@ class Scraper11st(Scraper):
 
     def goNextPage(self, driver):
         current_page = self.getCurrentPage(driver)
+        print(f"{current_page}페이지 완료")
         if current_page % 10 == 0:
             self.wait(driver, (By.XPATH, "//li[@class='next']/a"))
             driver.find_element_by_xpath("//li[@class='next']/a").click()
@@ -125,6 +126,7 @@ class Scraper11st(Scraper):
         driver = WebdriverBuilder.getDriver()
         try:
             for searchWord in searchWords:
+                print(f"현재검색어 : {searchWord}")
                 self.initSite(driver, searchWord)
                 try:
                     for i in range(25):
@@ -133,10 +135,10 @@ class Scraper11st(Scraper):
                         time.sleep(1)
                 except Exception as e:
                     print(e)
-                    print("except4")
+                    traceback.print_exc()
                     continue
         except Exception as e:
             print(e)
-            print("except5")
+            traceback.print_exc()
         finally:
             driver.quit()

@@ -160,7 +160,7 @@ class ScraperCoupang(Scraper):
                 driver.get(candidate_product.product_url)
 
                 more_discount_amount = 0
-                if candidate_product.check_more_discount:
+                if candidate_product.is_more_discount_exist:
                     more_discount_amount = self.getMoreDiscountAmount(driver, candidate_product)
 
                 card_discount_amount = self.getCardDiscountAmount(driver, candidate_product)
