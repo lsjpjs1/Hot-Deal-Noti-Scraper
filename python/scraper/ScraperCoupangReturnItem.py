@@ -50,10 +50,13 @@ class ProductPreview:
             self.check_more_discount) + "\n" + str(self.sale_status) + "\n\n"
 
 
-class ScraperCoupang(Scraper):
+class ScraperCoupangReturnItem(Scraper):
     candidate_products = []
     is_last_page = False
     item_count = 0
+
+    def __init__(self,target_page):
+        self.target_page = target_page
 
     def findCandidates(self, html: str):
         soup = BeautifulSoup(html, 'html.parser')
@@ -148,7 +151,7 @@ class ScraperCoupang(Scraper):
             "Accept-Language": "ko-KR,ko;q=0.8,en-US;q=0.5,en;q=0.3",
             'Cache-Control': 'no-cache'
         }
-        target_page = int(sys.argv[1])
+        target_page = self.target_page
         for currentPage in range(target_page, target_page+1):
             if not self.is_last_page:
                 print("현재 페이지", currentPage)
@@ -281,9 +284,12 @@ class ScraperCoupang(Scraper):
         finally:
             driver.quit()
 
-start_time = datetime.now()
-print(datetime.now(), f": 쿠팡 반품 {sys.argv[1]}페이지 크롤링 시작합니다!")
-scraperCoupang = ScraperCoupang()
-scraperCoupang.startScraping()
-print("시작시간 : ",start_time)
-print(datetime.now(), f": 쿠팡 반품 {sys.argv[1]}페이지 크롤링 종료합니다!")
+
+
+for i in range(1,10):
+    start_time = datetime.now()
+    print(datetime.now(), f": 쿠팡 반품 {i}페이지 크롤링 시작합니다!")
+    scraperCoupang = ScraperCoupangReturnItem(i)
+    scraperCoupang.startScraping()
+    print("시작시간 : ", start_time)
+    print(datetime.now(), f": 쿠팡 반품 {i}페이지 크롤링 종료합니다!")
