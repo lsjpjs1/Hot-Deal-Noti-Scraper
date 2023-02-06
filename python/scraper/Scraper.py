@@ -13,7 +13,7 @@ class Scraper:
     mq = RabbitMQ()
 
     def wait(self, driver, locator):
-        WebDriverWait(driver, 30).until(EC.presence_of_element_located(locator))
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located(locator))
 
     def waitDuringTime(self, driver, locator, waitTime):
         WebDriverWait(driver, waitTime).until(EC.presence_of_element_located(locator))
