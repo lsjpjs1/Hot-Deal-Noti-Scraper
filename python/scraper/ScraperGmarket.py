@@ -98,45 +98,45 @@ class ScraperGmarket(Scraper):
                                 hot_deal
                     )
                     print(hot_deal)
-                    continue
+                continue
 
-            if 12 <=card_discount_percent + coupon_discount_percent <=100:
-                second_driver = WebdriverBuilder.getDriver()
-                second_driver.get(url)
-
-                card_discount_amount = real_original_price*card_discount_percent/100
-                try:
-                    card_discount_amount = min(self.getCardDiscountAmount(second_driver),card_discount_amount)
-                except:
-                    print("카드할인 검색에러")
-                    pass
-
-
-                coupon_discount_amount = real_original_price * coupon_discount_percent / 100
-                try:
-                    coupon_discount_amount = min(self.getCouponDiscountAmount(second_driver), coupon_discount_amount)
-                except:
-                    print("쿠폰할인 검색에러")
-                    pass
-                print(f"원가 {original_price}")
-                print(f"카드할인 {card_discount_amount}")
-                print(f"쿠폰할인 {coupon_discount_amount}")
-
-                total_discount_rate = round((card_discount_amount + coupon_discount_amount) / original_price * 100)
-                if 12 <= total_discount_rate <=100:
-                    hot_deal = {
-                            "discountRate": total_discount_rate, "discountPrice": int(original_price-card_discount_amount-coupon_discount_amount),
-                            "originalPrice": original_price, "title": original_title,
-                            "url": url, "sourceSite": "G마켓",
-                            "hotDealThumbnailUrl": thumbnail_url
-                        }
-                    res.get("hotDealMessages").append(
-                        hot_deal
-                    )
-                    print("2유형 할인")
-                    print(url)
-                    print(hot_deal)
-                second_driver.quit()
+            # if 12 <=card_discount_percent + coupon_discount_percent <=100:
+            #     second_driver = WebdriverBuilder.getDriver()
+            #     second_driver.get(url)
+            #
+            #     card_discount_amount = real_original_price*card_discount_percent/100
+            #     try:
+            #         card_discount_amount = min(self.getCardDiscountAmount(second_driver),card_discount_amount)
+            #     except:
+            #         print("카드할인 검색에러")
+            #         pass
+            #
+            #
+            #     coupon_discount_amount = real_original_price * coupon_discount_percent / 100
+            #     try:
+            #         coupon_discount_amount = min(self.getCouponDiscountAmount(second_driver), coupon_discount_amount)
+            #     except:
+            #         print("쿠폰할인 검색에러")
+            #         pass
+            #     print(f"원가 {original_price}")
+            #     print(f"카드할인 {card_discount_amount}")
+            #     print(f"쿠폰할인 {coupon_discount_amount}")
+            #
+            #     total_discount_rate = round((card_discount_amount + coupon_discount_amount) / original_price * 100)
+            #     if 12 <= total_discount_rate <=100:
+            #         hot_deal = {
+            #                 "discountRate": total_discount_rate, "discountPrice": int(original_price-card_discount_amount-coupon_discount_amount),
+            #                 "originalPrice": original_price, "title": original_title,
+            #                 "url": url, "sourceSite": "G마켓",
+            #                 "hotDealThumbnailUrl": thumbnail_url
+            #             }
+            #         res.get("hotDealMessages").append(
+            #             hot_deal
+            #         )
+            #         print("2유형 할인")
+            #         print(url)
+            #         print(hot_deal)
+            #     second_driver.quit()
 
 
         self.mq.publish(json.dumps(res), 'inputHotDeal')
