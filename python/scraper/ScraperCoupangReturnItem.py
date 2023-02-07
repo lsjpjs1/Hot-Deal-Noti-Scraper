@@ -286,7 +286,7 @@ class ScraperCoupangReturnItem(Scraper):
 
 
 
-for i in range(1,10):
+for i in range(10,0,-1):
     start_time = datetime.now()
     print(datetime.now(), f": 쿠팡 반품 {i}페이지 크롤링 시작합니다!")
     scraperCoupang = ScraperCoupangReturnItem(i)
