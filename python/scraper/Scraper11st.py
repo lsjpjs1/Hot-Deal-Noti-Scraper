@@ -58,6 +58,8 @@ class Scraper11st(Scraper):
                 original_price = int(
                     item.find_element_by_xpath(".//dd//span[@class='value']").text.replace(",", ""))
 
+                print(original_title)
+                print(f"원가{original_price}")
                 try:
                     sub_title = item.find_element_by_xpath(".//div[@class='c_prd_advertise']").text.replace(" ", "").replace(".", "")
                 except Exception as e:
@@ -92,14 +94,17 @@ class Scraper11st(Scraper):
             for price_candidate in price_candidates:
                 if price_candidate / original_price > 0.5:
                     discount_list.append([int(100 - 100 * price_candidate / original_price), price_candidate, url])
+
             if discount_list:
-                if 15 <= discount_list[0][0] <= 100:
+                print(discount_list[0][0])
+                if 13 <= discount_list[0][0] <= 100:
                     hot_deal = {
                             "discountRate": discount_list[0][0], "discountPrice": discount_list[0][1],
                             "originalPrice": original_price, "title": original_title,
                             "url": discount_list[0][2], "sourceSite": "11번가" ,
                             "hotDealThumbnailUrl" : thumbnail_url
                         }
+                    print("hit")
                     print(hot_deal)
                     res.get("hotDealMessages").append(
                         hot_deal
