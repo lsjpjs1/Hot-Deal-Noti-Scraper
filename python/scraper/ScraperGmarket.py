@@ -133,7 +133,7 @@ class ScraperGmarket(Scraper):
                 print(f"쿠폰할인 {coupon_discount_amount}")
                 print(url)
                 total_discount_rate = round((card_discount_amount + coupon_discount_amount) / real_original_price * 100)
-                if 19 <= total_discount_rate <=100 and real_original_price > 100000:
+                if 19 <= total_discount_rate <=100 and real_original_price > 250000:
                     hot_deal = {
                             "discountRate": total_discount_rate, "discountPrice": int(real_original_price-card_discount_amount-coupon_discount_amount),
                             "originalPrice": original_price, "title": original_title,
