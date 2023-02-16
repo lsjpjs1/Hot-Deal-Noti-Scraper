@@ -97,7 +97,7 @@ class Scraper11st(Scraper):
 
             if discount_list:
                 print(discount_list[0][0])
-                if 13 <= discount_list[0][0] <= 100:
+                if 15 <= discount_list[0][0] <= 100:
                     hot_deal = {
                             "discountRate": discount_list[0][0], "discountPrice": discount_list[0][1],
                             "originalPrice": original_price, "title": original_title,
@@ -109,7 +109,8 @@ class Scraper11st(Scraper):
                     res.get("hotDealMessages").append(
                         hot_deal
                     )
-        self.mq.publish(json.dumps(res), 'inputHotDeal')
+        self.mq.publish(json.dumps(res), 'inputClassifyHotDealCosine')
+        # self.mq.publish(json.dumps(res), 'inputHotDeal')
         # self.mq.publish(json.dumps(res), 'inputKeywordNotification')
 
     def getCurrentPage(self, driver):

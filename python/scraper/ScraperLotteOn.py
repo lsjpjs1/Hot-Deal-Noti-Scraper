@@ -78,7 +78,7 @@ class ScraperLotteOn(Scraper):
                         hot_deal
                     )
                     print(hot_deal)
-        self.mq.publish(json.dumps(res), 'inputHotDeal')
+        self.mq.publish(json.dumps(res), 'inputClassifyHotDealCosine')
         # self.mq.publish(json.dumps(res), 'inputKeywordNotification')
 
     def goNextPage(self, driver):

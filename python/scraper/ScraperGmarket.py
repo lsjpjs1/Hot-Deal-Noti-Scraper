@@ -149,7 +149,7 @@ class ScraperGmarket(Scraper):
                 second_driver.quit()
 
 
-        self.mq.publish(json.dumps(res), 'inputHotDeal')
+        self.mq.publish(json.dumps(res), 'inputClassifyHotDealCosine')
 
     def getCouponDiscountAmount(self, driver, original_price):
         self.wait(driver, (By.XPATH, "//div[@class='box__coupon-wrap']"))

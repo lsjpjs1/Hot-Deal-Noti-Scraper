@@ -185,7 +185,7 @@ class ScraperCoupang(Scraper):
                         "hotDealThumbnailUrl": candidate_product.thumbnail_url
                     }
                     print(hot_deal)
-                    self.mq.publish(json.dumps({"hotDealMessages": [hot_deal]}), 'inputHotDeal')
+                    self.mq.publish(json.dumps({"hotDealMessages": [hot_deal]}), 'inputClassifyHotDealCosine')
                 driver.quit()
                 driver = WebdriverBuilder.getDriver()
                 time.sleep(random.randint(5, 10))

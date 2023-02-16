@@ -219,7 +219,7 @@ class ScraperCoupangReturnItem(Scraper):
                         "returnItemSaleStatus": candidate_product.sale_status
                     }
                     print(hot_deal)
-                    self.mq.publish(json.dumps({"hotDealMessages": [hot_deal]}), 'inputHotDeal')
+                    self.mq.publish(json.dumps({"hotDealMessages": [hot_deal]}), 'inputClassifyHotDealCosine')
             except Exception as e:
                 print(candidate_product.product_title)
                 traceback.print_exc()
