@@ -24,16 +24,20 @@ class ClassifyHotDealConsumer:
         HotDealValidater().validateHotDeal(hotDealJson)
 
     def main(self):
-        conn = pika.BlockingConnection(pika.ConnectionParameters(self.__url, self.__port, self.__vhost, self.__cred))
-        chan = conn.channel()
-        chan.basic_consume(
-            queue=self.__queue,
-            on_message_callback=ClassifyHotDealConsumer.on_message,
-            auto_ack=True
-        )
-        print('Consumer is starting...')
-        chan.start_consuming()
-        return
+        try:
+            conn = pika.BlockingConnection(pika.ConnectionParameters(self.__url, self.__port, self.__vhost, self.__cred))
+            chan = conn.channel()
+            chan.basic_consume(
+                queue=self.__queue,
+                on_message_callback=ClassifyHotDealConsumer.on_message,
+                auto_ack=True
+            )
+            print('Consumer is starting...')
+            chan.start_consuming()
+            return
+        except Exception as e:
+            print(e)
+            self.main()
 
 
 consumer = ClassifyHotDealConsumer()
