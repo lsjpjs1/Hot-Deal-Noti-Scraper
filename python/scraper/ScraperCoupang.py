@@ -160,9 +160,9 @@ class ScraperCoupang(Scraper):
                 driver.get(candidate_product.product_url)
 
                 more_discount_amount = 0
-                if candidate_product.is_more_discount_exist:
-                    more_discount_amount = self.getMoreDiscountAmount(driver, candidate_product)
-
+                # if candidate_product.is_more_discount_exist:
+                #     more_discount_amount = self.getMoreDiscountAmount(driver, candidate_product)
+                candidate_product.normal_discount_price = self.getWowCouponDiscountPrice(driver,candidate_product)
                 card_discount_amount = self.getCardDiscountAmount(driver, candidate_product)
                 total_discount_amount = candidate_product.original_price - candidate_product.normal_discount_price + more_discount_amount + card_discount_amount
                 total_discount_percent = int(total_discount_amount / candidate_product.original_price * 100)
@@ -193,6 +193,18 @@ class ScraperCoupang(Scraper):
                 print(e)
                 continue
 
+    def getWowCouponDiscountPrice(self,driver:WebDriver, product: ProductPreview):
+        try:
+            self.waitDuringTime(driver, (By.XPATH, "//div[contains(@class, 'major-price-coupon')]//span[@class='total-price']"),3)
+            wow_coupon_discount_price = int(driver.find_element_by_xpath(
+                "//div[contains(@class, 'major-price-coupon')]//span[@class='total-price']").text.replace("원",
+                                                                                                          "").replace(
+                ",", ""))
+            print("와우할인가",wow_coupon_discount_price)
+            return wow_coupon_discount_price
+        except Exception as e:
+            return product.normal_discount_price
+
     def getCardDiscountAmount(self, driver: WebDriver, product: ProductPreview):
         if product.card_discount_percent != 0:
             self.waitDuringTime(driver, (By.XPATH, "//div[@class='ccid-detail-tit']/a"), 10)
@@ -201,17 +213,26 @@ class ScraperCoupang(Scraper):
             driver.switch_to.frame(
                 driver.find_element_by_xpath("//iframe[@class='card-benefit-popup__content-iframe']"))
             max_card_discount_amount = 0
+            max_card_discount_percent = 0
             self.waitDuringTime(driver, (By.XPATH, "//span[@class='ccid-benefit__duration']/.."), 10)
             for ele in driver.find_elements_by_xpath("//span[@class='ccid-benefit__duration']/.."):
                 max_card_discount_amount_area = re.findall("최대.*원", ele.text)
+                max_card_discount_percent_area = re.findall("[0-9]+%", ele.text)
                 if len(max_card_discount_amount_area) > 0:
                     max_card_discount_amount_area_str = max_card_discount_amount_area[0]
+                    max_card_discount_percent_area_str = max_card_discount_percent_area[0]
+                    print(max_card_discount_amount_area_str)
+                    print(max_card_discount_percent_area_str)
+                    percent = int(re.findall("(\d+)%", max_card_discount_percent_area_str)[0]) if len(
+                        re.findall("(\d+)%", max_card_discount_percent_area_str)) > 0 else 0
                     n_man_won = int(re.findall("(\d+)만", max_card_discount_amount_area_str)[0]) if len(
                         re.findall("(\d+)만", max_card_discount_amount_area_str)) > 0 else 0
                     n_chun_won = int(re.findall("(\d+)천", max_card_discount_amount_area_str)[0]) if len(
                         re.findall("(\d+)천", max_card_discount_amount_area_str)) > 0 else 0
                     max_card_discount_amount = max(n_man_won * 10000 + n_chun_won * 1000, max_card_discount_amount)
-            return int(min(product.original_price * product.card_discount_percent / 100, max_card_discount_amount))
+                    max_card_discount_percent = max(percent, max_card_discount_percent)
+            print(product.original_price,max_card_discount_percent/100)
+            return int(min(product.original_price * max_card_discount_percent / 100, max_card_discount_amount))
         else:
             return 0
 
