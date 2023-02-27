@@ -17,11 +17,14 @@ class HotDealValidater:
         except:
             print("DB Not Connected!.")
             return
-        cur = conn.cursor()
-        cur.execute("select product_id, model_name from product;")
-        products = cur.fetchall()
 
         hotDeals = hotDealJson["hotDealMessages"]
+        productTypeId = hotDealJson["productTypeId"]
+        cur = conn.cursor()
+        cur.execute("select product_id, model_name from product where product_type_id = %s;",[str(productTypeId)])
+        products = cur.fetchall()
+
+
         for hotDeal in hotDeals:
             # 2. for문 돌면서 코사인 유사도 제일 높은 것 뽑기
             max_similarity = 0

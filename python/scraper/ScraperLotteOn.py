@@ -35,7 +35,7 @@ class ScraperLotteOn(Scraper):
 
         comma_won_re = re.compile('([0-9]{1,3}(,[0-9]{3})+)')
         man_won_re = re.compile('([0-9]+)만')
-        res = {"hotDealMessages":[]}
+        res = {"hotDealMessages":[],"productTypeId":self.productTypeId}
         for item in items:
             try:
                 original_title = item.find_element_by_xpath(".//div[@class='srchProductUnitTitle']").text

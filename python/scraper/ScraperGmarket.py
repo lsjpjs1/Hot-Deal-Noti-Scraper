@@ -33,7 +33,7 @@ class ScraperGmarket(Scraper):
 
         comma_won_re = re.compile('([0-9]{1,3}(,[0-9]{3})+)')
         man_won_re = re.compile('([0-9]+)만')
-        res = {"hotDealMessages":[]}
+        res = {"hotDealMessages":[],"productTypeId":self.productTypeId}
 
         page_height = driver.execute_script("return document.body.scrollHeight")
         for i in range(0, page_height, 40):

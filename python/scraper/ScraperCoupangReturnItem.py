@@ -24,6 +24,7 @@ from .Scraper import Scraper
 from .WebdriverBuilder import WebdriverBuilder
 from .CoupangPartnersLinkGenerator import CoupangPartnersLinkGenerator
 
+
 class ProductPreview:
     NORMAL = "NORMAL"
     SOLD_OUT = "SOLD_OUT"
@@ -55,7 +56,7 @@ class ScraperCoupangReturnItem(Scraper):
     is_last_page = False
     item_count = 0
 
-    def __init__(self,target_page):
+    def __init__(self, target_page):
         self.target_page = target_page
 
     def findCandidates(self, html: str):
@@ -152,7 +153,7 @@ class ScraperCoupangReturnItem(Scraper):
             'Cache-Control': 'no-cache'
         }
         target_page = self.target_page
-        for currentPage in range(target_page, target_page+1):
+        for currentPage in range(target_page, target_page + 1):
             if not self.is_last_page:
                 print("현재 페이지", currentPage)
                 url = f'https://www.coupang.com/np/categories/497135?listSize=120&brand=42308%2C259%2C263%2C6619%2C258%2C17000%2C257%2C16890%2C17031%2C17350&offerCondition=PACKAGE_DAMAGED%2CNON_ACTIVATED%2CREPACKAGING%2CREFURBISHED%2CUSED%2CRETURN&filterType=rocket%2Crocket_wow%2Ccoupang_global&isPriceRange=false&minPrice=&maxPrice=&page={currentPage}&channel=user&fromComponent=N&selectedPlpKeepFilter=&sorter=bestAsc&filter=&component=497035&rating=0&rocketAll=true'
@@ -202,7 +203,6 @@ class ScraperCoupangReturnItem(Scraper):
                 return_item_url = f"https://www.coupang.com/vp/products/{product_id}?itemId={item_id}&vendorItemId={return_item_vendor_item_id}&landingType=USED_DETAIL"
 
                 if 15 <= discount_percent <= 100 and return_item_quality != "새 상품":
-
                     # try:
                     #     return_item_url = CoupangPartnersLinkGenerator.getCoupangPartnersLink(return_item_url)
                     # except Exception as e:
@@ -219,7 +219,8 @@ class ScraperCoupangReturnItem(Scraper):
                         "returnItemSaleStatus": candidate_product.sale_status
                     }
                     print(hot_deal)
-                    self.mq.publish(json.dumps({"hotDealMessages": [hot_deal]}), 'inputClassifyHotDealCosine')
+                    self.mq.publish(json.dumps({"hotDealMessages": [hot_deal], "productTypeId": self.productTypeId}),
+                                    'inputClassifyHotDealCosine')
             except Exception as e:
                 print(candidate_product.product_title)
                 traceback.print_exc()
@@ -285,11 +286,10 @@ class ScraperCoupangReturnItem(Scraper):
             driver.quit()
 
 
-
-for i in range(10,0,-1):
+for i in range(10, 0, -1):
     start_time = datetime.now()
     print(datetime.now(), f": 쿠팡 반품 {i}페이지 크롤링 시작합니다!")
-    scraperCoupang = ScraperCoupangReturnItem(i)
+    scraperCoupang = ScraperCoupangReturnItem(productTypeId=1)
     scraperCoupang.startScraping()
     print("시작시간 : ", start_time)
     print(datetime.now(), f": 쿠팡 반품 {i}페이지 크롤링 종료합니다!")

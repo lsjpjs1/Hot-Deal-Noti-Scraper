@@ -12,6 +12,10 @@ class Scraper:
     result = pd.DataFrame({"할인율": [], "할인가": [], "제목": [], "url": []})
     mq = RabbitMQ()
 
+
+    def __init__(self, productTypeId):
+        self.productTypeId = productTypeId
+
     def wait(self, driver, locator):
         WebDriverWait(driver, 10).until(EC.presence_of_element_located(locator))
 

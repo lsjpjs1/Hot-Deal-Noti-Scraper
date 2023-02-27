@@ -47,7 +47,7 @@ class Scraper11st(Scraper):
 
         comma_won_re = re.compile('([0-9]{1,3}(,[0-9]{3})+)')
         man_won_re = re.compile('([0-9]+)만')
-        res = {"hotDealMessages": []}
+        res = {"hotDealMessages": [],"productTypeId":self.productTypeId}
         for item in items:
             sub_title = None
             try:

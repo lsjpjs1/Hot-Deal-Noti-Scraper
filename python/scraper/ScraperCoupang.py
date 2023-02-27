@@ -23,10 +23,11 @@ from .Scraper import Scraper
 from .WebdriverBuilder import WebdriverBuilder
 from .CoupangPartnersLinkGenerator import CoupangPartnersLinkGenerator
 
+
 class ProductPreview:
     def __init__(self, product_title, product_url, original_price, normal_discount_price, card_discount_percent,
                  normal_card_total_discount_percent,
-                 is_more_discount_exist, thumbnail_url,check_more_discount):
+                 is_more_discount_exist, thumbnail_url, check_more_discount):
         self.product_title = product_title
         self.product_url = product_url
         self.original_price = original_price
@@ -113,10 +114,11 @@ class ScraperCoupang(Scraper):
                 is_more_discount_exist = True
 
             check_more_discount = False
-            if item.find("span", {"class": "badge badge-benefit"}) is not None and item.find("span", {"class": "instant-discount-text"}) is not None:
+            if item.find("span", {"class": "badge badge-benefit"}) is not None and item.find("span", {
+                "class": "instant-discount-text"}) is not None:
                 instant_discount_text = item.find("span", {"class": "instant-discount-text"}).get_text()
-                if len(re.findall("와우쿠폰",instant_discount_text))==0:
-                    check_more_discount  = True
+                if len(re.findall("와우쿠폰", instant_discount_text)) == 0:
+                    check_more_discount = True
 
             thumbnail_url = ""
             if item.find("dt", {"class": "image"}) is not None:
@@ -124,7 +126,8 @@ class ScraperCoupang(Scraper):
 
             product_preview = ProductPreview(product_title, product_url, original_price, normal_discount_price,
                                              card_discount_percent,
-                                             normal_card_total_discount_percent, is_more_discount_exist, thumbnail_url, check_more_discount)
+                                             normal_card_total_discount_percent, is_more_discount_exist, thumbnail_url,
+                                             check_more_discount)
             if self.validateCandidate(product_preview):
                 self.candidate_products.append(product_preview)
 
@@ -162,7 +165,7 @@ class ScraperCoupang(Scraper):
                 more_discount_amount = 0
                 # if candidate_product.is_more_discount_exist:
                 #     more_discount_amount = self.getMoreDiscountAmount(driver, candidate_product)
-                candidate_product.normal_discount_price = self.getWowCouponDiscountPrice(driver,candidate_product)
+                candidate_product.normal_discount_price = self.getWowCouponDiscountPrice(driver, candidate_product)
                 card_discount_amount = self.getCardDiscountAmount(driver, candidate_product)
                 total_discount_amount = candidate_product.original_price - candidate_product.normal_discount_price + more_discount_amount + card_discount_amount
                 total_discount_percent = int(total_discount_amount / candidate_product.original_price * 100)
@@ -185,7 +188,8 @@ class ScraperCoupang(Scraper):
                         "hotDealThumbnailUrl": candidate_product.thumbnail_url
                     }
                     print(hot_deal)
-                    self.mq.publish(json.dumps({"hotDealMessages": [hot_deal]}), 'inputClassifyHotDealCosine')
+                    self.mq.publish(json.dumps({"hotDealMessages": [hot_deal], "productTypeId": self.productTypeId}),
+                                    'inputClassifyHotDealCosine')
                 driver.quit()
                 driver = WebdriverBuilder.getDriver()
                 time.sleep(random.randint(5, 10))
@@ -193,14 +197,16 @@ class ScraperCoupang(Scraper):
                 print(e)
                 continue
 
-    def getWowCouponDiscountPrice(self,driver:WebDriver, product: ProductPreview):
+    def getWowCouponDiscountPrice(self, driver: WebDriver, product: ProductPreview):
         try:
-            self.waitDuringTime(driver, (By.XPATH, "//div[contains(@class, 'major-price-coupon')]//span[@class='total-price']"),3)
+            self.waitDuringTime(driver,
+                                (By.XPATH, "//div[contains(@class, 'major-price-coupon')]//span[@class='total-price']"),
+                                3)
             wow_coupon_discount_price = int(driver.find_element_by_xpath(
                 "//div[contains(@class, 'major-price-coupon')]//span[@class='total-price']").text.replace("원",
                                                                                                           "").replace(
                 ",", ""))
-            print("와우할인가",wow_coupon_discount_price)
+            print("와우할인가", wow_coupon_discount_price)
             return wow_coupon_discount_price
         except Exception as e:
             return product.normal_discount_price
@@ -231,7 +237,7 @@ class ScraperCoupang(Scraper):
                         re.findall("(\d+)천", max_card_discount_amount_area_str)) > 0 else 0
                     max_card_discount_amount = max(n_man_won * 10000 + n_chun_won * 1000, max_card_discount_amount)
                     max_card_discount_percent = max(percent, max_card_discount_percent)
-            print(product.original_price,max_card_discount_percent/100)
+            print(product.original_price, max_card_discount_percent / 100)
             return int(min(product.original_price * max_card_discount_percent / 100, max_card_discount_amount))
         else:
             return 0
@@ -258,9 +264,10 @@ class ScraperCoupang(Scraper):
         finally:
             driver.quit()
 
+
 start_time = datetime.now()
 print(datetime.now(), ": 쿠팡 크롤링 시작합니다!")
-scraperCoupang = ScraperCoupang()
+scraperCoupang = ScraperCoupang(productTypeId=1)
 scraperCoupang.startScraping()
-print("시작시간 : ",start_time)
+print("시작시간 : ", start_time)
 print(datetime.now(), f": 쿠팡 크롤링 종료합니다!")
