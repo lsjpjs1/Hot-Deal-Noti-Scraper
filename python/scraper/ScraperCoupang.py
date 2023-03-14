@@ -95,7 +95,7 @@ class ScraperCoupang(Scraper):
             if item.find("span", {"class": "discount-percentage"}) is not None:
                 normal_discount_text = item.find("span", {"class": "discount-percentage"}).get_text().replace("\n", "")
                 try:
-                    normal_discount_percent = int(re.findall("(\d)\%", normal_discount_text)[0])
+                    normal_discount_percent = int(re.findall("(\d+)\%", normal_discount_text)[0])
                 except Exception as e:
                     print(e)
 
@@ -103,7 +103,7 @@ class ScraperCoupang(Scraper):
             if item.find("span", {"class": "ccid-txt"}) is not None:
                 card_discount_text = item.find("span", {"class": "ccid-txt"}).get_text().replace("\n", "")
                 try:
-                    card_discount_percent = int(re.findall("(\d)\%", card_discount_text)[0])
+                    card_discount_percent = int(re.findall("(\d+)\%", card_discount_text)[0])
                 except Exception as e:
                     print(e)
 
@@ -140,18 +140,22 @@ class ScraperCoupang(Scraper):
             return True
         return False
 
-    def collectCandidate(self):
+    def collectCandidate(self,driver: WebDriver):
         headers = {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
             "Accept-Language": "ko-KR,ko;q=0.8,en-US;q=0.5,en;q=0.3",
             'Cache-Control': 'no-cache'
         }
+
+        driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
+            "source": """ Object.defineProperty(navigator, 'webdriver', { get: () => undefined }) """})
         for currentPage in range(1, 30):
             if not self.is_last_page:
                 print("현재 페이지", currentPage)
-                url = f'https://www.coupang.com/np/categories/497135?listSize=120&brand=&offerCondition=&filterType=rocket%2Crocket&isPriceRange=false&minPrice=&maxPrice=&page={currentPage}&channel=user&fromComponent=N&selectedPlpKeepFilter=&sorter=bestAsc&filter=&component=497035&rating=0&rocketAll=true'
-                response = requests.get(url, headers=headers)
-                self.findCandidates(response.text)
+                driver.get(f'https://www.coupang.com/np/categories/497135?listSize=120&brand=&offerCondition=&filterType=rocket%2Crocket&isPriceRange=false&minPrice=&maxPrice=&page={currentPage}&channel=user&fromComponent=N&selectedPlpKeepFilter=&sorter=bestAsc&filter=&component=497035&rating=0&rocketAll=true')
+                # url = f'https://www.coupang.com/np/categories/497135?listSize=120&brand=&offerCondition=&filterType=rocket%2Crocket&isPriceRange=false&minPrice=&maxPrice=&page={currentPage}&channel=user&fromComponent=N&selectedPlpKeepFilter=&sorter=bestAsc&filter=&component=497035&rating=0&rocketAll=true'
+                # response = requests.get(url, headers=headers)
+                self.findCandidates(driver.page_source)
                 time.sleep(random.randint(5, 7))
 
     def checkCandidates(self, driver: WebDriver):
@@ -254,9 +258,9 @@ class ScraperCoupang(Scraper):
             return 0
 
     def startScraping(self):
-        self.collectCandidate()
-        print("후보 상품 개수: ", str(len(self.candidate_products)))
         driver = WebdriverBuilder.getDriver()
+        self.collectCandidate(driver)
+        print("후보 상품 개수: ", str(len(self.candidate_products)))
         try:
             self.checkCandidates(driver)
         except Exception as e:
