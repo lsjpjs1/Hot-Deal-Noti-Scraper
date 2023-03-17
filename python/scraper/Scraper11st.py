@@ -14,6 +14,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 from .Scraper import Scraper
 from .WebdriverBuilder import WebdriverBuilder
 
+import Scraper11stCard
+
 
 class Scraper11st(Scraper):
     isPowerProduct = True
@@ -106,9 +108,11 @@ class Scraper11st(Scraper):
                         }
                     print("hit")
                     print(hot_deal)
+
                     res.get("hotDealMessages").append(
                         hot_deal
                     )
+
         self.mq.publish(json.dumps(res), 'inputClassifyHotDealCosine')
         # self.mq.publish(json.dumps(res), 'inputHotDeal')
         # self.mq.publish(json.dumps(res), 'inputKeywordNotification')
