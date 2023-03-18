@@ -6,14 +6,19 @@ import psycopg2
 
 from ..messagequeue.RabbitMQ import RabbitMQ
 
+import os
+from dotenv import load_dotenv
+
 class HotDealValidater:
     mq = RabbitMQ()
     def validateHotDeal(self,hotDealJson):
         # 1. 디비에서 프로덕트 제목 목록 쭉 가져오기
         conn = None
         try:
-            conn = psycopg2.connect(host="hot-deal-noti-db-1.ccgzvp0lrzfk.ap-northeast-2.rds.amazonaws.com",
-                                    dbname="hotDealNotification", user="Rudder", password="forRudder")
+            conn = psycopg2.connect(host=os.environ.get('DBHost'),
+                                    dbname=os.environ.get('DBName'),
+                                    user=os.environ.get('DBUser'),
+                                    password=os.environ.get('DBPassword'))
         except:
             print("DB Not Connected!.")
             return
