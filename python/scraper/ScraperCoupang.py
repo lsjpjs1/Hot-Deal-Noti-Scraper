@@ -170,7 +170,7 @@ class ScraperCoupang(Scraper):
                 # if candidate_product.is_more_discount_exist:
                 #     more_discount_amount = self.getMoreDiscountAmount(driver, candidate_product)
                 candidate_product.normal_discount_price = self.getWowCouponDiscountPrice(driver, candidate_product)
-                card_discount_amount = self.getCardDiscountAmount(driver, candidate_product)
+                card_discount_amount = self.getCardDiscountAmount(driver, candidate_product,candidate_product.normal_discount_price)
                 total_discount_amount = candidate_product.original_price - candidate_product.normal_discount_price + more_discount_amount + card_discount_amount
                 total_discount_percent = int(total_discount_amount / candidate_product.original_price * 100)
                 if 15 <= total_discount_percent <= 100:
@@ -215,7 +215,7 @@ class ScraperCoupang(Scraper):
         except Exception as e:
             return product.normal_discount_price
 
-    def getCardDiscountAmount(self, driver: WebDriver, product: ProductPreview):
+    def getCardDiscountAmount(self, driver: WebDriver, product: ProductPreview, wowDiscountPrice: int):
         if product.card_discount_percent != 0:
             self.waitDuringTime(driver, (By.XPATH, "//div[@class='ccid-detail-tit']/a"), 10)
             driver.find_element_by_xpath("//div[@class='ccid-detail-tit']/a").click()
@@ -241,8 +241,8 @@ class ScraperCoupang(Scraper):
                         re.findall("(\d+)천", max_card_discount_amount_area_str)) > 0 else 0
                     max_card_discount_amount = max(n_man_won * 10000 + n_chun_won * 1000, max_card_discount_amount)
                     max_card_discount_percent = max(percent, max_card_discount_percent)
-            print(product.original_price, max_card_discount_percent / 100)
-            return int(min(product.original_price * max_card_discount_percent / 100, max_card_discount_amount))
+            print(wowDiscountPrice, max_card_discount_percent / 100)
+            return int(min(wowDiscountPrice * max_card_discount_percent / 100, max_card_discount_amount))
         else:
             return 0
 
