@@ -24,31 +24,37 @@ class ScraperLotteOnCard(Scraper):
 
         cardDiscountDict = dict()
 
-        cardName_reg = re.compile('([\s\S]+) [0-9]+%')
-        cardDiscountPercent_reg = re.compile('[\s\S]+ ([0-9]+)%')
+        cardNames = []
+        discountPercent = []
+        maxDiscount = []
 
         driver = WebdriverBuilder.getDriver()
         driver.get(url)
         time.sleep(2)
         driver.find_element_by_xpath("//div[@class='content benefitContent']//button[@data-object='prd_info=more']").click()
-        
-        items = driver.find_elements_by_xpath("//div[@class='historyText']//strong")
+        time.sleep(2)
+        cardNameItems = driver.find_elements_by_xpath("//div[@class='historyText']//strong")
+        for i in range(len(cardNameItems)) :
+            itemText = cardNameItems[i].get_attribute("innerHTML")
+            if i%2 == 1: cardNames.append(itemText)
 
-        for item in items :
-            print(item.get_attribute("innerHTML"))
+        discountPercent_reg = re.compile("([0-9]+)%할인")
+        maxDiscount_reg = re.compile("([0-9]+,[0-9]+)원")
+        percentItems = driver.find_elements_by_xpath("//div[@class='tableBox']//td[@class='right']")
+        for i in range(len(percentItems)) :
+            itemText = percentItems[i].get_attribute("innerHTML")
+            itemText = itemText.replace("\n","")
+            itemText = itemText.replace(" ","")
+            if i % 2 == 0 :
+                match_discountPercent = discountPercent_reg.findall(itemText)
+                discountPercent.append(int(match_discountPercent[0]))
+            else :
+                match_maxDiscount = maxDiscount_reg.findall(itemText)
+                match_maxDiscount[0] = match_maxDiscount[0].replace(",","")
+                maxDiscount.append(int(match_maxDiscount[0]))
 
-        # items = driver.find_elements_by_xpath("//div[@class='content benefitContent']//span[@class='cards']")
-        # for item in items:
-        #     print(item.get_attribute("innerHTML"))
-        # if len(items) == 0: return None
-        # for item in items :
-        #     itemText = item.get_attribute("innerHTML")
-        #     cardName = cardName_reg.findall(itemText)
-        #     cardDiscountPercent = cardDiscountPercent_reg.findall(itemText)
-        #     cardDiscountDict[cardName[0]] = int(cardDiscountPercent[0])
+        for i in range(len(cardNames)):
+            cardDiscountDict[cardNames[i]] = {"discountPercent" : discountPercent[i], "maxDiscount" : maxDiscount[i]}
 
-        # print(cardDiscountDict)
-        # return {"LotteOnCardDiscount": {"cardList" : cardDiscountDict}}
+        return {"LotteOnCardDiscount" : cardDiscountDict}
     
-tt = ScraperLotteOnCard()
-tt.collectData("https://www.lotteon.com/p/product/LO2056427037?sitmNo=LO2056427037_2056427038&mall_no=1&dp_infw_cd=SCHlg%20%EB%85%B8%ED%8A%B8%EB%B6%81")
