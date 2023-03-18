@@ -14,7 +14,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 from .Scraper import Scraper
 from .WebdriverBuilder import WebdriverBuilder
 
-import Scraper11stCard
 
 
 class Scraper11st(Scraper):

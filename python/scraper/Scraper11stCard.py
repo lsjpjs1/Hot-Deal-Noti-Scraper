@@ -63,6 +63,3 @@ class Scraper11stCard(Scraper):
         print(cardDiscountDict, maxDiscount)
 
         return { "11stCardDiscount" : cardDiscountDict} 
-                
-tt = Scraper11stCard()
-tt.collectData("https://www.11st.co.kr/products/4200498024?trTypeCd=20&trCtgrNo=585021")
