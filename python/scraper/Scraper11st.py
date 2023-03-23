@@ -13,11 +13,13 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 from .Scraper import Scraper
 from .WebdriverBuilder import WebdriverBuilder
-
+from .validationdiscount.ValidationDiscount11st import ValidationDiscount11st
 
 
 class Scraper11st(Scraper):
     isPowerProduct = True
+    validationDiscount = ValidationDiscount11st()
+    res = {}
 
     def initSite(self, driver, searchWord):
         self.isPowerProduct = True
@@ -48,12 +50,14 @@ class Scraper11st(Scraper):
 
         comma_won_re = re.compile('([0-9]{1,3}(,[0-9]{3})+)')
         man_won_re = re.compile('([0-9]+)만')
-        res = {"hotDealMessages": [],"productTypeId":self.productTypeId}
+
         for item in items:
             sub_title = None
             try:
                 original_title = item.find_element_by_xpath(".//div[@class='c_prd_name c_prd_name_row_1']").text
-                title = item.find_element_by_xpath(".//div[@class='c_prd_name c_prd_name_row_1']").text.replace(" ", "").replace(".", "")
+                title = item.find_element_by_xpath(".//div[@class='c_prd_name c_prd_name_row_1']").text.replace(" ",
+                                                                                                                "").replace(
+                    ".", "")
                 url = item.find_element_by_xpath(".//div[@class='c_prd_name c_prd_name_row_1']/a").get_attribute("href")
                 thumbnail_url = item.find_element_by_xpath(".//img").get_attribute("src")
                 original_price = int(
@@ -62,7 +66,9 @@ class Scraper11st(Scraper):
                 print(original_title)
                 print(f"원가{original_price}")
                 try:
-                    sub_title = item.find_element_by_xpath(".//div[@class='c_prd_advertise']").text.replace(" ", "").replace(".", "")
+                    sub_title = item.find_element_by_xpath(".//div[@class='c_prd_advertise']").text.replace(" ",
+                                                                                                            "").replace(
+                        ".", "")
                 except Exception as e:
                     print("부제목 없음")
             except Exception as e:
@@ -81,7 +87,7 @@ class Scraper11st(Scraper):
                 for man_won in match_man:
                     price_candidates.append(int(man_won[1]) * 10000)
 
-            #부제에서 특가정보 긁어오는 부분
+            # 부제에서 특가정보 긁어오는 부분
             if sub_title:
                 match_comma_sub = comma_won_re.finditer(sub_title)
                 match_man_sub = man_won_re.finditer(sub_title)
@@ -98,21 +104,18 @@ class Scraper11st(Scraper):
 
             if discount_list:
                 print(discount_list[0][0])
-                if 15 <= discount_list[0][0] <= 100:
+                if 15 <= discount_list[0][0] <= 100 and original_price > 200000:
                     hot_deal = {
-                            "discountRate": discount_list[0][0], "discountPrice": discount_list[0][1],
-                            "originalPrice": original_price, "title": original_title,
-                            "url": discount_list[0][2], "sourceSite": "11번가" ,
-                            "hotDealThumbnailUrl" : thumbnail_url
-                        }
-                    print("hit")
-                    print(hot_deal)
+                        "discountRate": discount_list[0][0], "discountPrice": discount_list[0][1],
+                        "originalPrice": original_price, "title": original_title,
+                        "url": discount_list[0][2], "sourceSite": "11번가",
+                        "hotDealThumbnailUrl": thumbnail_url
+                    }
 
-                    res.get("hotDealMessages").append(
+                    self.res.get("hotDealMessages").append(
                         hot_deal
                     )
 
-        self.mq.publish(json.dumps(res), 'inputClassifyHotDealCosine')
         # self.mq.publish(json.dumps(res), 'inputHotDeal')
         # self.mq.publish(json.dumps(res), 'inputKeywordNotification')
 
@@ -132,16 +135,18 @@ class Scraper11st(Scraper):
             driver.find_element_by_xpath(f"//a[text()='{next_page}']").click()
 
     def startScraping(self, searchWords):
+        self.res = {"hotDealMessages": [], "productTypeId": self.productTypeId}
         driver = WebdriverBuilder.getDriver()
         try:
             for searchWord in searchWords:
                 print(f"현재검색어 : {searchWord}")
                 self.initSite(driver, searchWord)
                 try:
-                    for i in range(25):
+                    for i in range(15):
                         self.collectData(driver)
                         self.goNextPage(driver)
                         time.sleep(1)
+                        print(len(self.res.get("hotDealMessages")))
                 except Exception as e:
                     print(e)
                     traceback.print_exc()
@@ -150,4 +155,16 @@ class Scraper11st(Scraper):
             print(e)
             traceback.print_exc()
         finally:
+
+            for hotDeal in self.res.get("hotDealMessages"):
+                (isValid, realPrice) = self.validationDiscount.validateDiscount(hotDeal["url"],
+                                                                                hotDeal["discountPrice"])
+                if isValid:
+                    hotDeal["discountPrice"] = realPrice
+                    print("hit")
+                    print(hotDeal)
+                    self.mq.publish(json.dumps({"hotDealMessages": [hotDeal], "productTypeId": self.productTypeId}),
+                                    'inputClassifyHotDealCosine')
+
             driver.quit()
+            self.validationDiscount.driver.quit()
